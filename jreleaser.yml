@@ -1,0 +1,27 @@
+# Generated with JReleaser 1.5.0 at 2023-03-22T13:24:29.4320845+09:00
+project:
+  name: jreleaser-azure-devops-extension
+  description: Task to install and run JReleaser with Azure Pipelines
+  longDescription: Task to install and run JReleaser with Azure Pipelines
+  authors:
+    - JIHUN KIM
+  license: Apache-2.0
+  inceptionYear: 2023
+  tags:
+    - 'azure devops'
+    - 'azure pipelines'
+
+release:
+  github:
+    owner: shblue21
+    overwrite: true
+    branch: main
+    changelog:
+      formatted: ALWAYS
+      preset: conventional-commits
+      sort: DESC
+      append:
+        enabled: true
+    prerelease:
+      enabled: true
+      pattern: .*-earlyaccess*
