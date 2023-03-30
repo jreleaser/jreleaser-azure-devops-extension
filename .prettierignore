@@ -1,0 +1,5 @@
+**/dist
+**/coverage
+**/.vscode
+**/*.md
+node_modules

@@ -1,0 +1,90 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+name: $(Build.BuildID)
+
+trigger:
+  - main
+
+resources:
+  - repo: self  
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build_JReleaser_Installer
+    steps:
+    - task: Npm@1
+      displayName: 'install'
+      inputs:
+        command: install
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
+    - task: Npm@1
+      displayName: 'build'
+      inputs:
+        command: custom
+        customCommand: 'run build'
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
+    - task: CopyFiles@2
+      displayName: 'copy'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller/'
+        Contents: |
+          **/*
+          !**/*.ts
+          !Test/**
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - publish: '$(Build.ArtifactStagingDirectory)'
+      artifact: JReleaserInstaller
+
+  - job: Build_JReleaser_Task
+    steps:
+    - task: Npm@1
+      displayName: 'install'
+      inputs:
+        command: install
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
+    - task: Npm@1
+      displayName: 'build'
+      inputs:
+        command: custom
+        customCommand: 'run build'
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
+    - task: CopyFiles@2
+      displayName: 'copy'
+      inputs:
+        sourceFolder: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask/
+        contents: |
+          **/*
+          !**/*.ts
+          !Test/**
+        targetFolder: $(Build.ArtifactStagingDirectory)
+    - publish: '$(Build.ArtifactStagingDirectory)'
+      artifact: JReleaserTask
+
+  - job: Build_JReleaser_Extension
+    dependsOn: ['Build_JReleaser_Installer', 'Build_JReleaser_Task']
+    steps:  
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download JReleaserInstaller'
+      inputs:
+        artifact: JReleaserInstaller
+        path: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download JReleaserTask'
+      inputs:
+        artifact: JReleaserTask
+        path: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
+    - task: CopyFiles@2
+      displayName: 'copy JReleaser Extension'
+      inputs:
+        contents: |
+          **/*
+          !**/*.ts
+        targetFolder: $(Build.ArtifactStagingDirectory)
+        overWrite: true

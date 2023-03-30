@@ -1,0 +1,184 @@
+{
+  "id": "c05e5a17-1cfc-46c4-a287-c2d298c52519",
+  "name": "JReleaserExecuter",
+  "friendlyName": "JReleaser Executer",
+  "description": "Execute JReleaser commands",
+  "author": "JIHUN KIM",
+  "minimumAgentVersion": "2.144.0",
+  "helpMarkDown": "",
+  "category": "Tool",
+  "version": {
+    "Major": "0",
+    "Minor": "0",
+    "Patch": "1"
+  },
+  "demands": [],
+  "instanceNameFormat": "JReleaser $(command)",
+  "groups": [
+    {
+      "name": "advancedArguments",
+      "displayName": "Advanced Configuration",
+      "isExpanded": false
+    },
+    {
+      "name": "initArguments",
+      "displayName": "Init Configuration",
+      "isExpanded": true,
+      "visibleRule": "command = init"
+    },
+    {
+      "name": "configArguments",
+      "displayName": "Config Configuration",
+      "isExpanded": true,
+      "visibleRule": "command = config"
+    },
+    {
+      "name": "releaseArguments",
+      "displayName": "Release Configuration",
+      "isExpanded": false,
+      "visibleRule": "command = release"
+    },
+    {
+      "name": "announceArguments",
+      "displayName": "Announce Configuration",
+      "isExpanded": true,
+      "visibleRule": "command = announce"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "command",
+      "type": "pickList",
+      "label": "Command",
+      "required": true,
+      "helpMarkDown": "JReleaser command to execute.",
+      "options": {
+        "init": "Init",
+        "config": "Config",
+        "release": "Release",
+        "announce": "Announce",
+        "custom": "Custom"
+      },
+      "properties": {
+        "EditableOptions": "False"
+      }
+    },
+    {
+      "name": "customArguments",
+      "type": "string",
+      "label": "Custom Arguments",
+      "helpMarkDown": "The custom JReleaser command to execute.",
+      "required": false
+    },
+    {
+      "name": "initFormat",
+      "type": "pickList",
+      "label": "Format",
+      "options": {
+        "yml": "yml",
+        "json": "json",
+        "toml": "toml"
+      },
+      "helpMarkDown": "Configuration file format. Currently supported formats are: yml, json, and toml.",
+      "groupName": "initArguments",
+      "required": false
+    },
+    {
+      "name": "initOverwrite",
+      "type": "boolean",
+      "label": "Overwrite",
+      "defaultValue": "false",
+      "helpMarkDown": "Overwrite existing configuration file.",
+      "groupName": "initArguments",
+      "required": false
+    },
+
+    {
+      "name": "configAssembly",
+      "type": "boolean",
+      "label": "Assembly",
+      "defaultValue": "false",
+      "helpMarkDown": "Display assembly configuration.",
+      "groupName": "configArguments",
+      "required": false
+    },
+    {
+      "name": "configAnnounce",
+      "type": "boolean",
+      "label": "Announce",
+      "defaultValue": "false",
+      "helpMarkDown": "Display announce configuration.",
+      "groupName": "configArguments",
+      "required": false
+    },
+    {
+      "name": "configChangelog",
+      "type": "boolean",
+      "label": "Changelog",
+      "defaultValue": "false",
+      "helpMarkDown": "Display changelog configuration.",
+      "groupName": "configArguments",
+      "required": false
+    },
+    {
+      "name": "configDownload",
+      "type": "boolean",
+      "label": "Download",
+      "defaultValue": "false",
+      "helpMarkDown": "Display download configuration.",
+      "groupName": "configArguments",
+      "required": false
+    },
+    {
+      "name": "configFull",
+      "type": "boolean",
+      "label": "Full",
+      "defaultValue": "false",
+      "helpMarkDown": "Display full configuration.",
+      "groupName": "configArguments",
+      "required": false
+    },
+
+    {
+      "name": "baseDirectory",
+      "type": "filePath",
+      "label": "Base directory",
+      "defaultValue": "$(System.DefaultWorkingDirectory)",
+      "helpMarkDown": "Directory containing the JReleaser config file. The default value is $(System.DefaultWorkingDirectory)",
+      "groupName": "advancedArguments",
+      "required": false
+    },
+    {
+      "name": "logLevel",
+      "type": "pickList",
+      "label": "Log level",
+      "options": {
+        "debug": "debug",
+        "info": "info",
+        "warn": "warn",
+        "quiet": "quiet"
+      },
+      "helpMarkDown": "Log level. Valid values are: debug, info, warn and quiet.",
+      "groupName": "advancedArguments",
+      "visibleRule": "command != env || command != template || command != json-schema",
+      "required": false
+    },
+
+    {
+      "name": "dryRun",
+      "type": "boolean",
+      "label": "dryrun",
+      "defaultValue": "false",
+      "helpMarkDown": "Skip remote operations.",
+      "groupName": "advancedArguments",
+      "required": false,
+      "visibleRule": "command = release || command = announce"
+    }
+  ],
+  "execution": {
+    "Node16": {
+      "target": "./dist/jreleaserTask.js",
+      "argumentFormat": ""
+    }
+  }
+}

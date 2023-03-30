@@ -1,0 +1,40 @@
+{
+  "id": "1e9b0513-ccd5-4ca0-8c69-bdb200d3a876",
+  "name": "JReleaserInstaller",
+  "friendlyName": "JReleaser Installer",
+  "description": "Installs JReleaser for JReleaser integration tasks.",
+  "author": "JIHUN KIM",
+  "helpMarkDown": "Installs JReleaser for JReleaser integration tasks.",
+  "category": "Tool",
+  "minimumAgentVersion": "2.144.0",
+  "version": {
+    "Major": "0",
+    "Minor": "0",
+    "Patch": "1"
+  },
+  "demands": [],
+  "instanceNameFormat": "JReleaser Installer",
+  "groups": [
+    {
+      "name": "advanced",
+      "displayName": "Advanced",
+      "isExpanded": false
+    }
+  ],
+  "inputs": [
+    {
+      "name": "version",
+      "type": "string",
+      "label": "Install specific version",
+      "defaultValue": "latest",
+      "required": true,
+      "helpMarkDown": "Input to install a specific version of JReleaser."
+    }
+  ],
+  "execution": {
+    "Node16": {
+      "target": "./dist/installer.js",
+      "argumentFormat": ""
+    }
+  }
+}

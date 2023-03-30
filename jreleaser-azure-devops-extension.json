@@ -1,0 +1,95 @@
+{
+  "manifestVersion": 1,
+  "id": "jreleaser-azure-devops-extension",
+  "publisher": "JReleaser",
+  "version": "0.0.1",
+  "name": "JReleaser",
+  "description": "Task to install and run JReleaser with Azure Pipelines",
+  "public": false,
+  "categories": ["Azure Pipelines"],
+  "tags": [
+    "JReleaser",
+    "Java",
+    "Artifact",
+    "Build",
+    "Release",
+    "Upload",
+    "Download",
+    "Repository"
+  ],
+  "links": {
+    "home": {
+      "uri": "https://jreleaser.org/"
+    },
+    "support": {
+      "uri": "https://github.com/shblue21/jreleaser-azure-devops-extension/issues"
+    },
+    "repository": {
+      "uri": "https://github.com/shblue21/jreleaser-azure-devops-extension"
+    },
+    "issues": {
+      "uri": "https://github.com/shblue21/jreleaser-azure-devops-extension/issues"
+    },
+    "license": {
+      "uri": "https://github.com/shblue21/jreleaser-azure-devops-extension/blob/master/LICENSE"
+    }
+  },
+  "icons": {
+    "default": "images/extension-icon.png"
+  },
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shblue21/jreleaser-azure-devops-extension"
+  },
+  "content": {
+    "details": {
+      "path": "README.md"
+    },
+    "license": {
+      "path": "LICENSE"
+    }
+  },
+  "screenshots": [
+    {
+      "path": "screenshots/pipeline-tasks.png"
+    },
+    {
+      "path": "screenshots/jreleaser-executor.png"
+    }
+  ],
+  "contributions": [
+    {
+      "id": "jreleaser-installer",
+      "type": "ms.vss-distributed-task.task",
+      "targets": ["ms.vss-distributed-task.tasks"],
+      "properties": {
+        "name": "tasks/JReleaserInstaller"
+      }
+    },
+    {
+      "id": "jreleaser-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": ["ms.vss-distributed-task.tasks"],
+      "properties": {
+        "name": "tasks/JReleaserTask"
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "images",
+      "addressable": true
+    },
+    {
+      "path": "tasks/JReleaserInstaller"
+    },
+    {
+      "path": "tasks/JReleaserTask"
+    }
+  ]
+}

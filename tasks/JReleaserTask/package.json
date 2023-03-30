@@ -1,0 +1,20 @@
+{
+  "name": "azure-pipelines-tasks-jreleaser-task",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/jreleaserTask.js",
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean"
+  },
+  "dependencies": {
+    "azure-pipelines-task-lib": "^4.2.0",
+    "azure-pipelines-tool-lib": "^2.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.14"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
