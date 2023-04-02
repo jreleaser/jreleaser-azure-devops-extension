@@ -1,0 +1,69 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+name: $(Build.BuildID)
+
+trigger: none
+
+parameters:
+- name: version
+  displayName: Version
+  type: string
+  default: ''
+
+- name: releaseType
+  displayName: releaseType
+  type: string
+  values:
+  - EarlyAccess
+  - Release
+  
+
+resources:
+  - repo: self
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: Release
+  jobs:
+  - job: Release
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'specific'
+        project: 'jreleaser-azure-devops-extensions'
+        definition: '${{ parameters.releaseType }}'
+        specificBuildWithTriggering: true
+        buildVersionToDownload: 'latest'
+        artifactName: 'JReleaserExtension-vsix'
+        targetPath: '$(System.DefaultWorkingDirectory)'
+    - ${{ if eq(parameters.releaseType, 'EarlyAccess') }}:
+      - script: |
+          echo "##vso[task.setvariable variable=version]$(git tag -l --sort=-v:refname | head -n 1 | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')-earlyaccess"
+        displayName: 'Set Early Access Version'
+    
+    - task: JReleaserInstaller@0
+      inputs:
+        version: 'latest'
+    - ${{if eq(parameters.releaseType, 'EarlyAccess')}}:
+      - task: JReleaserExecuter@0
+        env:
+          JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
+          JRELEASER_PROJECT_VERSION: $(version)
+        inputs:
+          command: 'custom'
+          customArguments: 'release --prerelease'
+    - ${{if eq(parameters.releaseType, 'Release')}}:
+      - task: JReleaserExecuter@0
+        env:
+          JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
+          JRELEASER_PROJECT_VERSION:  ${{ parameters.version}}
+        inputs:
+          command: 'custom'
+          customArguments: 'release'
+
+          

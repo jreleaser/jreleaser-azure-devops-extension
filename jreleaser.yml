@@ -25,3 +25,6 @@ release:
     prerelease:
       enabled: true
       pattern: .*-earlyaccess*
+  
+files:
+  artifacts: jreleaser-azure-devops-extension.vsix
