@@ -2,7 +2,7 @@
 
 > This Extension still in development.  
 
-Build: ![Build Status](https://dev.azure.com/shblue21/jreleaser-azure-devops-extensions/_apis/build/status/Build)
+Build: ![Build Status](https://dev.azure.com/shblue21/jreleaser-azure-devops-extension/_apis/build/status/Build)
 
 ## Overview
 The tasks in this extension allow for running JReleaser commands from Azure Pipelines.  
