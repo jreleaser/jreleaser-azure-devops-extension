@@ -35,7 +35,7 @@ stages:
     - task: DownloadPipelineArtifact@2
       inputs:
         buildType: 'specific'
-        project: 'jreleaser-azure-devops-extensions'
+        project: 'jreleaser-azure-devops-extension'
         definition: '${{ parameters.releaseType }}'
         specificBuildWithTriggering: true
         buildVersionToDownload: 'latest'

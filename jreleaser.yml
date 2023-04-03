@@ -27,4 +27,5 @@ release:
       pattern: .*-earlyaccess*
   
 files:
-  artifacts: jreleaser-azure-devops-extension.vsix
+  artifacts: 
+    - path: jreleaser-azure-devops-extension.vsix
