@@ -1,7 +1,7 @@
 import { ITaskContext } from '../context';
 
 export interface ICommand {
-  setup(ctx: ITaskContext): void;
+  initialize(ctx: ITaskContext): void;
   exec(): Promise<CommandResponse>;
 }
 export class CommandResponse {

@@ -5,15 +5,11 @@ import { ITaskContext } from '../context';
 import { AbstractModelCommand } from './abstractModelCommand';
 
 export class JReleaserAnnounce extends AbstractModelCommand {
-  private toolrunner: toolrunner.ToolRunner;
-
   constructor(toolrunner: toolrunner.ToolRunner) {
-    super();
-    this.toolrunner = toolrunner;
+    super(toolrunner);
   }
 
-  setup(ctx: ITaskContext): void {
-    super.setup(ctx);
+  protected setup(ctx: ITaskContext): void {
     this.options.unshift('announce');
     if (ctx.dryRun) {
       this.options.push('--dry-run');

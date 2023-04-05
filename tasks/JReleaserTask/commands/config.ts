@@ -1,19 +1,16 @@
 import { CommandResponse } from '.';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
 import * as tasks from 'azure-pipelines-task-lib/task';
-import { AbstractPlatformAwareModelCommand } from './abstractPlatformAwareModelCommand';
 import { ITaskContext } from '../context';
+import { AbstractPlatformAwareModelCommand } from './abstractPlatformAwareModelCommand';
 
 export class JReleaserConfig extends AbstractPlatformAwareModelCommand {
-  private toolrunner: toolrunner.ToolRunner;
 
   constructor(toolrunner: toolrunner.ToolRunner) {
-    super();
-    this.toolrunner = toolrunner;
+    super(toolrunner);
   }
 
-  setup(ctx: ITaskContext): void {
-    super.setup(ctx);
+  protected setup(ctx: ITaskContext): void {
     this.options.unshift('config');
   }
 

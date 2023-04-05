@@ -5,16 +5,13 @@ import * as tasks from 'azure-pipelines-task-lib/task';
 import { AbstractCommand } from './abstractCommand';
 
 export class JReleaserCustom extends AbstractCommand {
-  private toolrunner: toolrunner.ToolRunner;
-
   constructor(toolrunner: toolrunner.ToolRunner) {
-    super();
-    this.toolrunner = toolrunner;
+    super(toolrunner);
   }
 
-  setup(ctx: ITaskContext): void {
-    super.setup(ctx);
+  protected setup(ctx: ITaskContext): void {
   }
+
 
   exec(): Promise<CommandResponse> {
     for (const option of this.options) {

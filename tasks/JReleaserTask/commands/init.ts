@@ -5,29 +5,21 @@ import { AbstractLoggingCommand } from './abstractLoggingCommand';
 import * as tasks from 'azure-pipelines-task-lib/task';
 
 export class JReleaserInit extends AbstractLoggingCommand {
-  private overWrite: boolean;
-
-  private format: string;
-
-  private toolrunner: toolrunner.ToolRunner;
-
   constructor(toolrunner: toolrunner.ToolRunner) {
-    super();
-    this.toolrunner = toolrunner;
+    super(toolrunner);
   }
 
-  setup(ctx: ITaskContext): void {
-    super.setup(ctx);
+  protected setup(ctx: ITaskContext): void {
     this.options.unshift('init');
-    this.overWrite = ctx.initOverwrite;
-    this.format = ctx.initFormat;
-
-    if (this.overWrite) {
+    if (ctx.initOverwrite) {
       this.options.push('-o');
     }
-    if (this.format) {
+    if (ctx.initFormat) {
       this.options.push('-f');
-      this.options.push(this.format);
+      this.options.push(ctx.initFormat);
+    }
+    if (ctx.dryRun) {
+      this.options.push('--dry-run');
     }
   }
 

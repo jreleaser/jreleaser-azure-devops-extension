@@ -23,7 +23,7 @@ export class Task {
       throw new Error(`Unknown command: ${this.ctx.command}`);
     }
 
-    command.setup(this.ctx);
+    command.initialize(this.ctx);
     const response = await command.exec();
     if (response.status === commands.CommandStatus.Failed) {
       throw new Error(response.message);

@@ -10,8 +10,14 @@ export abstract class AbstractLoggingCommand extends AbstractCommand {
     this._logOption = value;
   }
 
-  setup(ctx: ITaskContext): void {
-    super.setup(ctx);
+  public initialize(ctx: ITaskContext): void {
+    super.initialize(ctx);
+    this.setupLogOption(ctx);
+    this.options.push(this.logOption);
+    this.setupBaseDirectory(ctx);
+  }
+
+  private setupLogOption(ctx: ITaskContext): void {
     switch (ctx.logLevel) {
       case 'debug':
         this.logOption = '--debug';
@@ -27,8 +33,9 @@ export abstract class AbstractLoggingCommand extends AbstractCommand {
         break;
       default:
     }
-    this.options.push(this.logOption);
+  }
 
+  private setupBaseDirectory(ctx: ITaskContext): void {
     if (ctx.baseDirectory) {
       process.env['JRELEASER_BASEDIR'] = ctx.baseDirectory;
     }
