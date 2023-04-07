@@ -55,15 +55,14 @@ stages:
           JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
           JRELEASER_PROJECT_VERSION: $(version)
         inputs:
-          command: 'custom'
-          customArguments: 'release --prerelease'
+          command: 'release'
+          customArguments: '--prerelease'
     - ${{if eq(parameters.releaseType, 'Release')}}:
       - task: JReleaserExecuter@0
         env:
           JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
           JRELEASER_PROJECT_VERSION:  ${{ parameters.version}}
         inputs:
-          command: 'custom'
-          customArguments: 'release'
+          command: 'release'
 
           

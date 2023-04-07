@@ -9,8 +9,8 @@ export interface ITaskContext {
   gitRootSearch: boolean;
 
   selectCurrentPlatform: boolean;
-  selectPlatforms: string[];
-  rejectPlatforms: string[];
+  selectPlatform: string[];
+  rejectPlatform: string[];
   dryRun: boolean;
 
   initFormat: string;
