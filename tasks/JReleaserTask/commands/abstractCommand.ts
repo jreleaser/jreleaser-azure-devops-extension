@@ -1,6 +1,7 @@
 import { CommandResponse, ICommand } from '.';
 import { ITaskContext } from '../context';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
+import * as tasks from 'azure-pipelines-task-lib/task';
 
 export abstract class AbstractCommand implements ICommand {
   options: string[] = [];
@@ -25,7 +26,10 @@ export abstract class AbstractCommand implements ICommand {
 
   protected buildOptions(ctx: ITaskContext, optionMapping: { [key: string]: string }): void {
     for (const key in optionMapping) {
-      if (ctx[key]) {
+      if (ctx[key] && ctx[key] !== '') {
+        this.options.push(optionMapping[key]);
+        this.options.push(ctx[key]);
+      } else if (ctx[key]) {
         this.options.push(optionMapping[key]);
       }
     }

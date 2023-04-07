@@ -7,7 +7,7 @@ export abstract class AbstractModelCommand extends AbstractLoggingCommand {
     this.buildOptions(ctx, {
       gitRootSearch: '--git-root-search',
       strict: '--strict',
-      configFile: '--config-file ${configFile}',
+      configFile: '--config-file',
     });
   }
 }
