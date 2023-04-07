@@ -19,30 +19,6 @@
       "name": "advancedArguments",
       "displayName": "Advanced Configuration",
       "isExpanded": false
-    },
-    {
-      "name": "initArguments",
-      "displayName": "Init Configuration",
-      "isExpanded": true,
-      "visibleRule": "command = init"
-    },
-    {
-      "name": "configArguments",
-      "displayName": "Config Configuration",
-      "isExpanded": true,
-      "visibleRule": "command = config"
-    },
-    {
-      "name": "releaseArguments",
-      "displayName": "Release Configuration",
-      "isExpanded": false,
-      "visibleRule": "command = release"
-    },
-    {
-      "name": "announceArguments",
-      "displayName": "Announce Configuration",
-      "isExpanded": true,
-      "visibleRule": "command = announce"
     }
   ],
   "inputs": [
@@ -80,7 +56,7 @@
         "toml": "toml"
       },
       "helpMarkDown": "Configuration file format. Currently supported formats are: yml, json, and toml.",
-      "groupName": "initArguments",
+      "visibleRule": "command = init",
       "required": false
     },
     {
@@ -89,7 +65,7 @@
       "label": "Overwrite",
       "defaultValue": "false",
       "helpMarkDown": "Overwrite existing configuration file.",
-      "groupName": "initArguments",
+      "visibleRule": "command = init",
       "required": false
     },
 
@@ -99,7 +75,7 @@
       "label": "Assembly",
       "defaultValue": "false",
       "helpMarkDown": "Display assembly configuration.",
-      "groupName": "configArguments",
+      "visibleRule": "command = config",
       "required": false
     },
     {
@@ -108,7 +84,7 @@
       "label": "Announce",
       "defaultValue": "false",
       "helpMarkDown": "Display announce configuration.",
-      "groupName": "configArguments",
+      "visibleRule": "command = config",
       "required": false
     },
     {
@@ -117,7 +93,7 @@
       "label": "Changelog",
       "defaultValue": "false",
       "helpMarkDown": "Display changelog configuration.",
-      "groupName": "configArguments",
+      "visibleRule": "command = config",
       "required": false
     },
     {
@@ -126,7 +102,7 @@
       "label": "Download",
       "defaultValue": "false",
       "helpMarkDown": "Display download configuration.",
-      "groupName": "configArguments",
+      "visibleRule": "command = config",
       "required": false
     },
     {
@@ -135,7 +111,7 @@
       "label": "Full",
       "defaultValue": "false",
       "helpMarkDown": "Display full configuration.",
-      "groupName": "configArguments",
+      "visibleRule": "command = config",
       "required": false
     },
 
@@ -172,7 +148,7 @@
       "helpMarkDown": "Skip remote operations.",
       "groupName": "advancedArguments",
       "required": false,
-      "visibleRule": "command = release || command = announce"
+      "visibleRule": "command = announce || command = changelog || command = deploy"
     }
   ],
   "execution": {
