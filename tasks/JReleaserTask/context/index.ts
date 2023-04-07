@@ -4,9 +4,13 @@ export interface ITaskContext {
   logLevel: string;
   customArguments: string;
 
+  configFile: String;
+  strict: boolean; 
   gitRootSearch: boolean;
-  strict: boolean;
-  // configFile: string;
+
+  selectCurrentPlatform: boolean;
+  selectPlatforms: string[];
+  rejectPlatforms: string[];
   dryRun: boolean;
 
   initFormat: string;

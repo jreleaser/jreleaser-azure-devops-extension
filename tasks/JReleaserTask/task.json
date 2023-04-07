@@ -114,7 +114,64 @@
       "visibleRule": "command = config",
       "required": false
     },
-
+    {
+      "name": "configFile",
+      "type": "filePath",
+      "label": "Config file",
+      "defaultValue": "$(System.DefaultWorkingDirectory)/jreleaser.yml",
+      "helpMarkDown": "Path to the JReleaser config file. The default value is $(System.DefaultWorkingDirectory)/jreleaser.yml",
+      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate",
+      "groupName": "advancedArguments",
+      "required": false
+    },
+    {
+      "name": "strict",
+      "type": "boolean",
+      "label": "Strict",
+      "defaultValue": "false",
+      "helpMarkDown": "Enable strict mode.",
+      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate",
+      "groupName": "advancedArguments",
+      "required": false
+    },
+    {
+      "name": "gitRootSearch",
+      "type": "boolean",
+      "label": "Git root search",
+      "helpMarkDown": "Searches for the Git root.",
+      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate",
+      "defaultValue": "false",
+      "groupName": "advancedArguments",
+      "required": false
+    },
+    {
+      "name": "selectCurrentPlatform",
+      "type": "boolean",
+      "label": "Select current platform",
+      "helpMarkDown": "Activates paths matching the current platform.",
+      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate || command != announce || command != changelog || command != deploy || command != download ",
+      "defaultValue": "false",
+      "groupName": "advancedArguments",
+      "required": false
+    },
+    {
+      "name": "selectPlatform",
+      "type": "string",
+      "label": "Select platform",
+      "helpMarkDown": "Activates paths matching the given platform. separate multiple platforms with a comma.",
+      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate || command != announce || command != changelog || command != deploy || command != download ",
+      "groupName": "advancedArguments",
+      "required": false
+    },
+    {
+      "name": "rejectPlatform",
+      "type": "string",
+      "label": "Reject platform",
+      "helpMarkDown": "Activates paths not matching the given platform. separate multiple platforms with a comma.",
+      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate || command != announce || command != changelog || command != deploy || command != download ",
+      "groupName": "advancedArguments",
+      "required": false
+    },
     {
       "name": "baseDirectory",
       "type": "filePath",

@@ -20,13 +20,16 @@ export default class TaskContext implements ITaskContext {
       tasks.getInput
     );
     this.getBoolInput = tasks.getBoolInput;
-
     this.getVariable = tasks.getVariable;
     this.setVariable = tasks.setVariable;
   }
 
   get command() {
     return this.getInput('command');
+  }
+
+  get configFile() {
+    return this.getInput('configFile');
   }
 
   // Advanced Arguments
@@ -44,6 +47,18 @@ export default class TaskContext implements ITaskContext {
 
   get strict() {
     return this.getBoolInput('strict');
+  }
+
+  get selectCurrentPlatform() {
+    return this.getBoolInput('selectCurrentPlatform');
+  }
+
+  get selectPlatforms() {
+    return this.getInput('selectPlatforms').split(',');
+  }
+
+  get rejectPlatforms() {
+    return this.getInput('rejectPlatforms').split(',');
   }
 
   get dryRun() {

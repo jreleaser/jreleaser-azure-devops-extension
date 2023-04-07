@@ -5,8 +5,9 @@ export abstract class AbstractPlatformAwareModelCommand extends AbstractModelCom
   public initialize(ctx: ITaskContext): void {
     super.initialize(ctx);
     this.buildOptions(ctx, {
-      gitRootSearch: '--git-root-search',
-      strict: '--strict',
+      selectCurrentPlatform: '--select-current-platform',
+      selectPlatforms: '--select-platforms ${selectPlatforms}',
+      rejectPlatforms: '--reject-platforms ${rejectPlatforms}',
     });
   }
 }
