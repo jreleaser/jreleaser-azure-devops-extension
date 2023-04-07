@@ -42,10 +42,16 @@ stages:
         artifactName: 'JReleaserExtension-vsix'
         targetPath: '$(System.DefaultWorkingDirectory)'
     - ${{ if eq(parameters.releaseType, 'EarlyAccess') }}:
-      - script: |
-          echo "##vso[task.setvariable variable=version]$(git tag -l --sort=-v:refname | head -n 1 | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')-earlyaccess"
+      - task: CmdLine@2
         displayName: 'Set Early Access Version'
-    
+        inputs:
+          script: |
+            latest_tag=$(git tag -l | head -n 1)
+            if [[ $latest_tag == *"earlyaccess"* ]]; then
+              echo "##vso[task.setvariable variable=version]$latest_tag"
+            else
+              echo "##vso[task.setvariable variable=version]$(echo $latest_tag | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')-earlyaccess"
+            fi
     - task: JReleaserInstaller@0
       inputs:
         version: 'latest'
@@ -54,6 +60,7 @@ stages:
         env:
           JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
           JRELEASER_PROJECT_VERSION: $(version)
+          JRELEASER_TAG_NAME: $(version)
         inputs:
           command: 'release'
           customArguments: '--prerelease'
@@ -62,6 +69,7 @@ stages:
         env:
           JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
           JRELEASER_PROJECT_VERSION:  ${{ parameters.version}}
+          JRELEASER_TAG_NAME: ${{ parameters.version}}
         inputs:
           command: 'release'
 
