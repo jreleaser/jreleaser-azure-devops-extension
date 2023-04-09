@@ -22,3 +22,4 @@ export { JReleaserCustom as JReleaserCustomHandler } from './custom';
 export { JReleaserAnnounce as JReleaserAnnounceHandler } from './announce';
 export { JReleaserRelease as JReleaserReleaseHandler } from './release';
 export { JReleaserAssemble as JReleaserAssembleHandler } from './assemble';
+export { JReleaserCatalog as JReleaserCatalogHandler } from './catalog';
