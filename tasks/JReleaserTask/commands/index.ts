@@ -23,3 +23,4 @@ export { JReleaserAnnounce as JReleaserAnnounceHandler } from './announce';
 export { JReleaserRelease as JReleaserReleaseHandler } from './release';
 export { JReleaserAssemble as JReleaserAssembleHandler } from './assemble';
 export { JReleaserCatalog as JReleaserCatalogHandler } from './catalog';
+export { JReleaserChangelog as JReleaserChangelogHandler } from './changelog';

@@ -17,6 +17,7 @@ export class Task {
       release: new commands.JReleaserReleaseHandler(this.toolrunner),
       assemble: new commands.JReleaserAssembleHandler(this.toolrunner),
       catalog: new commands.JReleaserCatalogHandler(this.toolrunner),
+      changelog: new commands.JReleaserChangelogHandler(this.toolrunner),
     };
   }
 
