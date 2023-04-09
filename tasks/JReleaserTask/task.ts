@@ -15,6 +15,7 @@ export class Task {
       custom: new commands.JReleaserCustomHandler(this.toolrunner),
       announce: new commands.JReleaserAnnounceHandler(this.toolrunner),
       release: new commands.JReleaserReleaseHandler(this.toolrunner),
+      assemble: new commands.JReleaserAssembleHandler(this.toolrunner),
     };
   }
 
