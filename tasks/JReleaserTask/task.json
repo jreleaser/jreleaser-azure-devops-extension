@@ -36,7 +36,8 @@
         "catalog": "Catalog",
         "release": "Release",
         "announce": "Announce",
-        "custom": "Custom"
+        "custom": "Custom",
+        "checksum": "Checksum"
       },
       "properties": {
         "EditableOptions": "False"

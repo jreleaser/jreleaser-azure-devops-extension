@@ -24,3 +24,4 @@ export { JReleaserRelease as JReleaserReleaseHandler } from './release';
 export { JReleaserAssemble as JReleaserAssembleHandler } from './assemble';
 export { JReleaserCatalog as JReleaserCatalogHandler } from './catalog';
 export { JReleaserChangelog as JReleaserChangelogHandler } from './changelog';
+export { JReleaserChecksum as JReleaserChecksumHandler } from './checksum';
