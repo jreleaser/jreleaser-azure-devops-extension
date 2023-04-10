@@ -209,7 +209,7 @@
       "helpMarkDown": "Skip remote operations.",
       "groupName": "advancedArguments",
       "required": false,
-      "visibleRule": "command = announce || command = changelog || command = deploy"
+      "visibleRule": "command = announce || command = changelog || command = deploy || command = download || command = fullRelease || command = package || command = publish || command = release || command = upload"
     }
   ],
   "execution": {
