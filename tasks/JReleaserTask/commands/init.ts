@@ -18,9 +18,6 @@ export class JReleaserInit extends AbstractLoggingCommand {
       this.options.push('-f');
       this.options.push(ctx.initFormat);
     }
-    if (ctx.dryRun) {
-      this.options.push('--dry-run');
-    }
   }
 
   exec(): Promise<CommandResponse> {
