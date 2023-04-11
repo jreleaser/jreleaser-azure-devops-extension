@@ -79,23 +79,36 @@ export default class TaskContext implements ITaskContext {
   }
 
   // Config Arguments
-  get configAssembly() {
-    return this.getBoolInput('configAssembly');
-  }
-
-  get configAnnounce() {
-    return this.getBoolInput('configAnnounce');
-  }
-
-  get configChangelog() {
-    return this.getBoolInput('configChangelog');
-  }
-
-  get configDownload() {
-    return this.getBoolInput('configDownload');
+  get configType() {
+    return this.getInput('configType');
   }
 
   get configFull() {
     return this.getBoolInput('configFull');
+  }
+
+  // Template Eval Arguments
+  get templateEvalTargetDirectory() {
+    return this.getInput('templateEvalTargetDirectory');
+  }
+
+  get templateEvalOverwrite() {
+    return this.getBoolInput('templateEvalOverwrite');
+  }
+
+  get templateEvalInputType() {
+    return this.getInput('templateEvalInputType');
+  }
+
+  get templateEvalInput() {
+    return this.getInput('templateEvalInput');
+  }
+
+  get templateEvalInputFile() {
+    return this.getInput('templateEvalInputFile');
+  }
+  
+  get templateEvalType() {
+    return this.getInput('templateEvalType');
   }
 }

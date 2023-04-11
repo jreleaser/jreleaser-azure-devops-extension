@@ -4,17 +4,14 @@ import * as tasks from 'azure-pipelines-task-lib/task';
 import { ITaskContext } from '../context';
 import { AbstractPlatformAwareModelCommand } from './abstractPlatformAwareModelCommand';
 
-export class JReleaserConfig extends AbstractPlatformAwareModelCommand {
+export class JReleaserTemplateEval extends AbstractPlatformAwareModelCommand {
   constructor(toolrunner: toolrunner.ToolRunner) {
     super(toolrunner);
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('config');
-    if (ctx.configFull) {
-      this.options.push('--full');
-    }
-    switch (ctx.configType) {
+    this.options.unshift('template', 'eval');
+    switch (ctx.templateEvalType) {
       case 'announce':
         this.options.push('--announce');
         break;
@@ -27,6 +24,19 @@ export class JReleaserConfig extends AbstractPlatformAwareModelCommand {
       case 'download':
         this.options.push('--download');
         break;
+    }
+
+    switch (ctx.templateEvalInputType) {
+      case 'file':
+        this.options.push('--input-file=' + ctx.templateEvalInput);
+        break;
+      case 'directory':
+        this.options.push('--input-directory=' + ctx.templateEvalInput);
+        break;
+    }
+
+    if (ctx.templateEvalOverwrite) {
+      this.options.push('--overwrite');
     }
   }
 

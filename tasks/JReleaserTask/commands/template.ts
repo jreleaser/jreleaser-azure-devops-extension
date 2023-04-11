@@ -1,33 +1,16 @@
 import { CommandResponse } from '.';
+import { ITaskContext } from '../context';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
 import * as tasks from 'azure-pipelines-task-lib/task';
-import { ITaskContext } from '../context';
-import { AbstractPlatformAwareModelCommand } from './abstractPlatformAwareModelCommand';
+import { AbstractCommand } from './abstractCommand';
 
-export class JReleaserConfig extends AbstractPlatformAwareModelCommand {
+export class JReleaserTemplate extends AbstractCommand {
   constructor(toolrunner: toolrunner.ToolRunner) {
     super(toolrunner);
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('config');
-    if (ctx.configFull) {
-      this.options.push('--full');
-    }
-    switch (ctx.configType) {
-      case 'announce':
-        this.options.push('--announce');
-        break;
-      case 'assembly':
-        this.options.push('--assembly');
-        break;
-      case 'changelog':
-        this.options.push('--changelog');
-        break;
-      case 'download':
-        this.options.push('--download');
-        break;
-    }
+    this.options.unshift('template');
   }
 
   exec(): Promise<CommandResponse> {

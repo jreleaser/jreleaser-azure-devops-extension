@@ -19,6 +19,18 @@ export class Task {
       catalog: new commands.JReleaserCatalogHandler(this.toolrunner),
       changelog: new commands.JReleaserChangelogHandler(this.toolrunner),
       checksum: new commands.JReleaserChecksumHandler(this.toolrunner),
+      deploy: new commands.JReleaserDeployHandler(this.toolrunner),
+      download: new commands.JReleaserDownloadHandler(this.toolrunner),
+      env: new commands.JReleaserEnvHandler(this.toolrunner),
+      fullRelease: new commands.JReleaserFullReleaseHandler(this.toolrunner),
+      jsonSchema: new commands.JReleaserJsonSchemaHandler(this.toolrunner),
+      package: new commands.JReleaserPackageHandler(this.toolrunner),
+      prepare: new commands.JReleaserPrepareHandler(this.toolrunner),
+      publish: new commands.JReleaserPublishHandler(this.toolrunner),
+      sign: new commands.JReleaserSignHandler(this.toolrunner),
+      template: new commands.JReleaserTemplateHandler(this.toolrunner),
+      templateEval: new commands.JReleaserTemplateEvalHandler(this.toolrunner),
+      upload: new commands.JReleaserUploadHandler(this.toolrunner),
     };
   }
 

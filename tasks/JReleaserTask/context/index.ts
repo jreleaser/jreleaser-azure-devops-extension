@@ -16,11 +16,15 @@ export interface ITaskContext {
   initFormat: string;
   initOverwrite: boolean;
 
-  configAssembly: boolean;
-  configAnnounce: boolean;
-  configChangelog: boolean;
-  configDownload: boolean;
+  configType: string;
   configFull: boolean;
+  
+  templateEvalTargetDirectory: string;
+  templateEvalOverwrite: boolean;
+  templateEvalInputType: string;
+  templateEvalInput: string;
+  templateEvalType: string;
+
 }
 
 export { default as TaskContext } from './taskContext';

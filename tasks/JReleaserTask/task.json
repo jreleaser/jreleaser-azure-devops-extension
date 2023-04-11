@@ -37,7 +37,19 @@
         "release": "Release",
         "announce": "Announce",
         "custom": "Custom",
-        "checksum": "Checksum"
+        "checksum": "Checksum",
+        "deploy": "Deploy",
+        "download": "Download",
+        "env": "Env",
+        "fullRelease": "Full Release",
+        "jsonSchema": "Json Schema",
+        "package": "Package",
+        "prepare": "Prepare",
+        "publish": "Publish",
+        "sign": "Sign",
+        "template": "Template",
+        "templateEval": "Template Evaluate",
+        "upload": "Upload"
       },
       "properties": {
         "EditableOptions": "False"
@@ -74,38 +86,16 @@
     },
 
     {
-      "name": "configAssembly",
-      "type": "boolean",
-      "label": "Assembly",
-      "defaultValue": "false",
-      "helpMarkDown": "Display assembly configuration.",
-      "visibleRule": "command = config",
-      "required": false
-    },
-    {
-      "name": "configAnnounce",
-      "type": "boolean",
-      "label": "Announce",
-      "defaultValue": "false",
-      "helpMarkDown": "Display announce configuration.",
-      "visibleRule": "command = config",
-      "required": false
-    },
-    {
-      "name": "configChangelog",
-      "type": "boolean",
-      "label": "Changelog",
-      "defaultValue": "false",
-      "helpMarkDown": "Display changelog configuration.",
-      "visibleRule": "command = config",
-      "required": false
-    },
-    {
-      "name": "configDownload",
-      "type": "boolean",
-      "label": "Download",
-      "defaultValue": "false",
-      "helpMarkDown": "Display download configuration.",
+      "name": "configType",
+      "type": "pickList",
+      "label": "Type",
+      "options": {
+        "announce": "announce",
+        "assembly": "assembly",
+        "changelog": "changelog",
+        "download": "download"
+      },
+      "helpMarkDown": "Configuration type. If not specified, the default configuration is displayed.",
       "visibleRule": "command = config",
       "required": false
     },
@@ -116,6 +106,58 @@
       "defaultValue": "false",
       "helpMarkDown": "Display full configuration.",
       "visibleRule": "command = config",
+      "required": false
+    },
+    {
+      "name": "templateEvalTargetDirectory",
+      "type": "string",
+      "label": "Target directory",
+      "helpMarkDown": "Directory where evaluated template(s) will be placed.",
+      "visibleRule": "command = templateEval",
+      "required": false
+    },
+    {
+      "name": "templateEvalOverwrite",
+      "type": "boolean",
+      "label": "Overwrite",
+      "defaultValue": "false",
+      "helpMarkDown": "Overwrite existing files.",
+      "visibleRule": "command = templateEval",
+      "required": false
+    },
+    {
+      "name": "templateInputType",
+      "type": "radio",
+      "label": "Input type",
+      "options": {
+        "file": "File",
+        "directory": "Directory"
+      },
+      "helpMarkDown": "Template input type.",
+      "visibleRule": "command = templateEval",
+      "required": false,
+      "defaultValue": "file"
+    },
+    {
+      "name": "templateEvalInput",
+      "type": "filePath",
+      "label": "Input",
+      "helpMarkDown": "Template input.",
+      "visibleRule": "templateInputType = file || templateInputType = directory",
+      "required": false
+    },   
+    {
+      "name": "templateEvalType",
+      "type": "pickList",
+      "label": "Type",
+      "options": {
+        "announce": "announce",
+        "assembly": "assembly",
+        "changelog": "changelog",
+        "download": "download"
+      },
+      "helpMarkDown": "Template Eval model, if not specified, the default model is used.",
+      "visibleRule": "command = templateEval",
       "required": false
     },
     {

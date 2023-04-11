@@ -9,9 +9,7 @@ export class JReleaserCustom extends AbstractCommand {
     super(toolrunner);
   }
 
-  protected setup(ctx: ITaskContext): void {
-  }
-
+  protected setup(ctx: ITaskContext): void {}
 
   exec(): Promise<CommandResponse> {
     for (const option of this.options) {
