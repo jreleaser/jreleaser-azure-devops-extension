@@ -32,6 +32,10 @@ stages:
   jobs:
   - job: Release
     steps:
+    - checkout: self
+      persistCredentials: true
+      fetchTags: true
+      fetchDepth: 0
     - task: DownloadPipelineArtifact@2
       inputs:
         buildType: 'specific'
@@ -46,9 +50,10 @@ stages:
         displayName: 'Set Early Access Version'
         inputs:
           script: |
-            latest_tag=$(git tag -l | head -n 1)
+            latest_tag=$(git tag -l --sort=-v:refname | head -n 1)
             if [[ $latest_tag == *"earlyaccess"* ]]; then
               echo "##vso[task.setvariable variable=version]$latest_tag"
+              git tag -d $latest_tag && git push --delete origin $latest_tag 
             else
               echo "##vso[task.setvariable variable=version]$(echo $latest_tag | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')-earlyaccess"
             fi
@@ -61,6 +66,7 @@ stages:
           JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
           JRELEASER_PROJECT_VERSION: $(version)
           JRELEASER_TAG_NAME: $(version)
+          JRELEASER_OVERWRITE: true
         inputs:
           command: 'release'
           customArguments: '--prerelease'

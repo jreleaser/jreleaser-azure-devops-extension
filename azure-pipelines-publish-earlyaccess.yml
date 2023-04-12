@@ -106,7 +106,7 @@ stages:
       displayName: 'get Early Access version'
       inputs:
         script: |
-          latest_tag=$(git tag -l | head -n 1)
+          latest_tag=$(git tag -l --sort=-v:refname | head -n 1)
           if [[ $latest_tag == *"earlyaccess"* ]]; then
             echo "##vso[task.setvariable variable=earlyaccessVer]$latest_tag"
           else
