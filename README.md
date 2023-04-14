@@ -11,11 +11,25 @@ The tasks in this extension allow for running JReleaser commands from Azure Pipe
 ### Suppoted JReleaser Commands
 The following commands are supported:  
 
+* `custom`
+* `jreleaser:env`
 * `jreleaser:init`
 * `jreleaser:config`
-* `jreleaser:announce`
+* `jreleaser:template`
+* `jreleaser:template eval`
+* `jreleaser:download`
+* `jreleaser:assemble`
+* `jreleaser:changelog`
+* `jreleaser:catalog`
+* `jreleaser:checksum`
+* `jreleaser:sign`
+* `jreleaser:deploy`
+* `jreleaser:upload`
 * `jreleaser:release`
-* `custom`
+* `jreleaser:prepare`
+* `jreleaser:package`
+* `jreleaser:announce`
+* `jreleaser:full-release`
 
 ### Install the JReleaser for Azure Pipelines
 Before running the JReleaser task, you can run the JReleaser Installer task to download JReleaser.
@@ -35,10 +49,9 @@ The following example shows how to run the `init` command.
 ```yaml
 - task: JReleaserExecuter@0
   inputs:
-    command: 'init'
-    initFormat: 'yml'
-    initOverwrite: true
-    logLevel: 'info'
+    command: 'release'
+    customArguments: '--prerelease'
+    logLevel: 'quiet'
 ```
   
 #### Run Custom JReleaser Commands
