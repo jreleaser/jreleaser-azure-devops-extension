@@ -64,3 +64,7 @@ if you want to run a custom JReleaser command, you can use the `custom` command.
     customArguments: '-D=jreleaser.github.token=1234'
     logLevel: 'info'
 ```
+
+### Example
+In the Azure pipeline project below URL, you can see the example of using the JReleaser for Azure Pipelines.  
+Example: https://dev.azure.com/shblue21/jreleaser-azure-devops-extension-example/_build
