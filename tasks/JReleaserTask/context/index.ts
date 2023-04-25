@@ -2,7 +2,7 @@ export interface ITaskContext {
   command: string;
   baseDirectory: string;
   logLevel: string;
-  customArguments: string;
+  arguments: string;
 
   configFile: String;
   strict: boolean; 

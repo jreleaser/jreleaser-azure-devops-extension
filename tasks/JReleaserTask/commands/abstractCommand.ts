@@ -15,7 +15,7 @@ export abstract class AbstractCommand implements ICommand {
   }
 
   private setupCommon(ctx: ITaskContext): void {
-    for (const arg of ctx.customArguments.split(' ')) {
+    for (const arg of ctx.arguments.split(' ')) {
       this.options.push(arg);
     }
   }

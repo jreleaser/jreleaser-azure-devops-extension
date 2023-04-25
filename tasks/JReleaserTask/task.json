@@ -56,9 +56,9 @@
       }
     },
     {
-      "name": "customArguments",
+      "name": "arguments",
       "type": "string",
-      "label": "Custom Arguments",
+      "label": "Arguments",
       "helpMarkDown": "The custom JReleaser command to execute.",
       "required": false
     },

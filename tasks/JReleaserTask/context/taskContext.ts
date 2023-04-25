@@ -65,8 +65,8 @@ export default class TaskContext implements ITaskContext {
     return this.getBoolInput('dryRun');
   }
 
-  get customArguments() {
-    return this.getInput('customArguments');
+  get arguments() {
+    return this.getInput('arguments');
   }
 
   // Init Arguments
