@@ -1,8 +1,8 @@
 {
   "id": "c05e5a17-1cfc-46c4-a287-c2d298c52519",
-  "name": "JReleaserExecuter",
-  "friendlyName": "JReleaser Executer",
-  "description": "Execute JReleaser commands",
+  "name": "JReleaserInvoker",
+  "friendlyName": "JReleaser Invoker",
+  "description": "Invoke JReleaser commands",
   "author": "JIHUN KIM",
   "minimumAgentVersion": "2.144.0",
   "helpMarkDown": "",
