@@ -61,7 +61,7 @@ stages:
       inputs:
         version: 'latest'
     - ${{if eq(parameters.releaseType, 'EarlyAccess')}}:
-      - task: JReleaserExecuter@0
+      - task: JReleaserInvoker@0
         env:
           JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
           JRELEASER_PROJECT_VERSION: $(version)
@@ -69,14 +69,13 @@ stages:
           JRELEASER_OVERWRITE: true
         inputs:
           command: 'release'
-          customArguments: '--prerelease'
+          arguments: '--prerelease'
     - ${{if eq(parameters.releaseType, 'Release')}}:
-      - task: JReleaserExecuter@0
+      - task: JReleaserInvoker@0
         env:
           JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
           JRELEASER_PROJECT_VERSION:  ${{ parameters.version}}
           JRELEASER_TAG_NAME: ${{ parameters.version}}
         inputs:
           command: 'release'
-
           
