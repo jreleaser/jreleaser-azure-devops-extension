@@ -59,7 +59,7 @@
       "path": "screenshots/pipeline-tasks.png"
     },
     {
-      "path": "screenshots/jreleaser-executor.png"
+      "path": "screenshots/jreleaser-invoker.png"
     }
   ],
   "contributions": [
