@@ -11,6 +11,14 @@ export class JReleaserUpload extends AbstractPlatformAwareModelCommand {
 
   protected setup(ctx: ITaskContext): void {
     this.options.unshift('upload');
+    if (ctx.distribution && ctx.distribution !== '') {
+      this.options.push('--distribution');
+      this.options.push(ctx.distribution);
+    }
+    if (ctx.excludeDistribution && ctx.excludeDistribution !== '') {
+      this.options.push('--exclude-distribution');
+      this.options.push(ctx.excludeDistribution);
+    }
     if(ctx.dryRun) {
       this.options.push('--dry-run');
     }

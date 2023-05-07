@@ -4,5 +4,11 @@ import { AbstractPlatformAwareModelCommand } from './abstractPlatformAwareModelC
 export abstract class AbstractPackagerModelCommand extends AbstractPlatformAwareModelCommand {
   public initialize(ctx: ITaskContext): void {
     super.initialize(ctx);
+    this.buildOptions(ctx, {
+      distribution: '--distribution',
+      packager: '--packager',
+      excludeDistribution: '--exclude-distribution',
+      excludePackager: '--exclude-packager',
+    });
   }
 }

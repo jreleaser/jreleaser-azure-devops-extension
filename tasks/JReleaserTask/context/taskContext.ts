@@ -66,6 +66,23 @@ export default class TaskContext implements ITaskContext {
     return this.getInput('rejectPlatform');
   }
 
+  // AbstractPackagerModelCommand
+  get distribution() {
+    return this.getInput('distribution');
+  }
+
+  get packager() {
+    return this.getInput('packager');
+  }
+
+  get excludeDistribution() {
+    return this.getInput('excludeDistribution');
+  }
+  
+  get excludePackager() {
+    return this.getInput('excludePackager');
+  }
+
   get arguments() {
     return this.getInput('arguments');
   }

@@ -15,6 +15,12 @@ export interface ITaskContext {
   selectPlatform: string;
   rejectPlatform: string;
 
+  // AbstractPackagerModelCommand
+  distribution: string;
+  packager: string;
+  excludeDistribution: string;
+  excludePackager: string;
+
   // Init Arguments
   initFormat: string;
   initOverwrite: boolean;

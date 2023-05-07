@@ -218,6 +218,36 @@
       "groupName": "advancedArguments",
       "required": false
     },
+
+    {
+      "name": "distribution",
+      "type": "string",
+      "label": "Distribution",
+      "helpMarkDown": "Include a distribution.",
+      "visibleRule": "command = assemble || command = catalog || command = checksum ||command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = templateEval || command = upload"
+    },
+    {
+      "name": "packager",
+      "type": "string",
+      "label": "Packager",
+      "helpMarkDown": "Include a packager.",
+      "visibleRule": "command = fullRelease || command = package || command = prepare || command = publish || command = templateGenerate"
+    },
+    {
+      "name": "excludeDistribution",
+      "type": "string",
+      "label": "Exclude distribution",
+      "helpMarkDown": "Exclude a distribution.",
+      "visibleRule": "command = assemble || command = catalog || command = checksum ||command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = templateEval || command = upload"
+    },
+    {
+      "name": "excludePackager",
+      "type": "string",
+      "label": "Exclude packager",
+      "helpMarkDown": "Exclude a packager.",
+      "visibleRule": "command = fullRelease || command = package || command = prepare || command = publish || command = templateGenerate"
+    },
+
     {
       "name": "baseDirectory",
       "type": "filePath",

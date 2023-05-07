@@ -11,6 +11,22 @@ export class JReleaserFullRelease extends AbstractPlatformAwareModelCommand {
 
   protected setup(ctx: ITaskContext): void {
     this.options.unshift('full-release');
+    if (ctx.distribution && ctx.distribution !== '') {
+      this.options.push('--distribution');
+      this.options.push(ctx.distribution);
+    }
+    if (ctx.excludeDistribution && ctx.excludeDistribution !== '') {
+      this.options.push('--exclude-distribution');
+      this.options.push(ctx.excludeDistribution);
+    }
+    if (ctx.packager && ctx.packager !== '') {
+      this.options.push('--packager');
+      this.options.push(ctx.packager);
+    }
+    if (ctx.excludePackager && ctx.excludePackager !== '') {
+      this.options.push('--exclude-packager');
+      this.options.push(ctx.excludePackager);
+    }
     if (ctx.dryRun) {
       this.options.push('--dry-run');
     }

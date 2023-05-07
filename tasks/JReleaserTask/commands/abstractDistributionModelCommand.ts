@@ -4,5 +4,9 @@ import { AbstractPlatformAwareModelCommand } from './abstractPlatformAwareModelC
 export abstract class AbstractDistributionModelCommand extends AbstractPlatformAwareModelCommand {
   public initialize(ctx: ITaskContext): void {
     super.initialize(ctx);
+    this.buildOptions(ctx, {
+      distribution: '--distribution',
+      excludeDistribution: '--exclude-distribution',
+    });
   }
 }

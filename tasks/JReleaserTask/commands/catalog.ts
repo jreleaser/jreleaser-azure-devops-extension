@@ -11,6 +11,14 @@ export class JReleaserCatalog extends AbstractPlatformAwareModelCommand {
 
   protected setup(ctx: ITaskContext): void {
     this.options.unshift('catalog');
+    if (ctx.distribution && ctx.distribution !== '') {
+      this.options.push('--distribution');
+      this.options.push(ctx.distribution);
+    }
+    if (ctx.excludeDistribution && ctx.excludeDistribution !== '') {
+      this.options.push('--exclude-distribution');
+      this.options.push(ctx.excludeDistribution);
+    }
   }
 
   exec(): Promise<CommandResponse> {
