@@ -204,7 +204,7 @@
       "name": "selectPlatform",
       "type": "string",
       "label": "Select platform",
-      "helpMarkDown": "Activates paths matching the given platform. separate multiple platforms with a comma.",
+      "helpMarkDown": "Activates paths matching the given platform.",
       "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate || command != announce || command != changelog || command != deploy || command != download ",
       "groupName": "advancedArguments",
       "required": false
@@ -213,7 +213,7 @@
       "name": "rejectPlatform",
       "type": "string",
       "label": "Reject platform",
-      "helpMarkDown": "Activates paths not matching the given platform. separate multiple platforms with a comma.",
+      "helpMarkDown": "Activates paths not matching the given platform.",
       "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate || command != announce || command != changelog || command != deploy || command != download ",
       "groupName": "advancedArguments",
       "required": false

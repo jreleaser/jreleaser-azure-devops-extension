@@ -54,11 +54,11 @@ export default class TaskContext implements ITaskContext {
   }
 
   get selectPlatform() {
-    return this.getInput('selectPlatform')?.split(',') || undefined;
+    return this.getInput('selectPlatform');
   }
 
   get rejectPlatform() {
-    return this.getInput('rejectPlatform')?.split(',') || undefined;
+    return this.getInput('rejectPlatform');
   }
 
   get dryRun() {
