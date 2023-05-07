@@ -47,7 +47,7 @@
         "prepare": "Prepare",
         "publish": "Publish",
         "sign": "Sign",
-        "template": "Template",
+        "templateGenerate": "Template Generate",
         "templateEval": "Template Evaluate",
         "upload": "Upload"
       },

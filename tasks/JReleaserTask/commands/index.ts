@@ -34,6 +34,6 @@ export { JReleaserPackage as JReleaserPackageHandler } from './package';
 export { JReleaserPrepare as JReleaserPrepareHandler } from './prepare';
 export { JReleaserPublish as JReleaserPublishHandler } from './publish';
 export { JReleaserSign as JReleaserSignHandler } from './sign';
-export { JReleaserTemplate as JReleaserTemplateHandler } from './template';
+export { JReleaserTemplateGenerate as JReleaserTemplateGenerateHandler } from './templateGenerate';
 export { JReleaserTemplateEval as JReleaserTemplateEvalHandler } from './templateEval';
 export { JReleaserUpload as JReleaserUploadHandler } from './upload';

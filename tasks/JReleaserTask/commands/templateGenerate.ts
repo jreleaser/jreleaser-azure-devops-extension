@@ -2,15 +2,15 @@ import { CommandResponse } from '.';
 import { ITaskContext } from '../context';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
 import * as tasks from 'azure-pipelines-task-lib/task';
-import { AbstractCommand } from './abstractCommand';
+import { AbstractLoggingCommand } from './abstractLoggingCommand';
 
-export class JReleaserTemplate extends AbstractCommand {
+export class JReleaserTemplateGenerate extends AbstractLoggingCommand {
   constructor(toolrunner: toolrunner.ToolRunner) {
     super(toolrunner);
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('template');
+    this.options.unshift('template','generate');
   }
 
   exec(): Promise<CommandResponse> {

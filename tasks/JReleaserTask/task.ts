@@ -28,7 +28,7 @@ export class Task {
       prepare: new commands.JReleaserPrepareHandler(this.toolrunner),
       publish: new commands.JReleaserPublishHandler(this.toolrunner),
       sign: new commands.JReleaserSignHandler(this.toolrunner),
-      template: new commands.JReleaserTemplateHandler(this.toolrunner),
+      templateGenerate: new commands.JReleaserTemplateGenerateHandler(this.toolrunner),
       templateEval: new commands.JReleaserTemplateEvalHandler(this.toolrunner),
       upload: new commands.JReleaserUploadHandler(this.toolrunner),
     };
