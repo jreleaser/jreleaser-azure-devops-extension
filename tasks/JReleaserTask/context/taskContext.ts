@@ -49,6 +49,11 @@ export default class TaskContext implements ITaskContext {
     return this.getBoolInput('strict');
   }
 
+  get dryRun() {
+    return this.getBoolInput('dryRun');
+  }
+
+  // AbstractPlatformAwareModelCommand
   get selectCurrentPlatform() {
     return this.getBoolInput('selectCurrentPlatform');
   }
@@ -59,10 +64,6 @@ export default class TaskContext implements ITaskContext {
 
   get rejectPlatform() {
     return this.getInput('rejectPlatform');
-  }
-
-  get dryRun() {
-    return this.getBoolInput('dryRun');
   }
 
   get arguments() {

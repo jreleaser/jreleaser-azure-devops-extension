@@ -3,22 +3,27 @@ export interface ITaskContext {
   baseDirectory: string;
   logLevel: string;
   arguments: string;
+  dryRun: boolean;
 
+  // AbstractModelCommand
   configFile: String;
   strict: boolean; 
   gitRootSearch: boolean;
 
+  // AbstractPlatformAwareModelCommand
   selectCurrentPlatform: boolean;
   selectPlatform: string;
   rejectPlatform: string;
-  dryRun: boolean;
 
+  // Init Arguments
   initFormat: string;
   initOverwrite: boolean;
 
+  // Config Arguments
   configType: string;
   configFull: boolean;
   
+  // Template Eval Arguments
   templateEvalTargetDirectory: string;
   templateEvalOverwrite: boolean;
   templateEvalInputType: string;
