@@ -224,28 +224,36 @@
       "type": "string",
       "label": "Distribution",
       "helpMarkDown": "Include a distribution.",
-      "visibleRule": "command = assemble || command = catalog || command = checksum ||command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = templateEval || command = upload"
+      "visibleRule": "command = assemble || command = catalog || command = checksum ||command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = templateEval || command = upload",
+      "groupName": "advancedArguments",
+      "required": false
     },
     {
       "name": "packager",
       "type": "string",
       "label": "Packager",
       "helpMarkDown": "Include a packager.",
-      "visibleRule": "command = fullRelease || command = package || command = prepare || command = publish || command = templateGenerate"
+      "visibleRule": "command = fullRelease || command = package || command = prepare || command = publish || command = templateGenerate",
+      "groupName": "advancedArguments",
+      "required": false
     },
     {
       "name": "excludeDistribution",
       "type": "string",
       "label": "Exclude distribution",
       "helpMarkDown": "Exclude a distribution.",
-      "visibleRule": "command = assemble || command = catalog || command = checksum ||command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = templateEval || command = upload"
+      "visibleRule": "command = assemble || command = catalog || command = checksum ||command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = templateEval || command = upload",
+      "groupName": "advancedArguments",
+      "required": false
     },
     {
       "name": "excludePackager",
       "type": "string",
       "label": "Exclude packager",
       "helpMarkDown": "Exclude a packager.",
-      "visibleRule": "command = fullRelease || command = package || command = prepare || command = publish || command = templateGenerate"
+      "visibleRule": "command = fullRelease || command = package || command = prepare || command = publish || command = templateGenerate",
+      "groupName": "advancedArguments",
+      "required": false
     },
 
     {
