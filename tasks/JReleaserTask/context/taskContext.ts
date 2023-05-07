@@ -49,6 +49,10 @@ export default class TaskContext implements ITaskContext {
     return this.getBoolInput('strict');
   }
 
+  get properties() {
+    return this.getInput('properties');
+  }
+
   get dryRun() {
     return this.getBoolInput('dryRun');
   }

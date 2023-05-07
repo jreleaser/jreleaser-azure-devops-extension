@@ -191,6 +191,17 @@
       "required": false
     },
     {
+      "name": "properties",
+      "type": "string",
+      "label": "set property",
+      "helpMarkDown": "Sets the value of a property..",
+      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate",
+      "defaultValue": "false",
+      "groupName": "advancedArguments",
+      "required": false
+    },
+
+    {
       "name": "selectCurrentPlatform",
       "type": "boolean",
       "label": "Select current platform",

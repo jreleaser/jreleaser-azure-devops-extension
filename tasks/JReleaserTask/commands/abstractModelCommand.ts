@@ -8,6 +8,7 @@ export abstract class AbstractModelCommand extends AbstractLoggingCommand {
       gitRootSearch: '--git-root-search',
       strict: '--strict',
       configFile: '--config-file',
+      properties: '--set-property',
     });
   }
 }

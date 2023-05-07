@@ -9,6 +9,7 @@ export interface ITaskContext {
   configFile: String;
   strict: boolean; 
   gitRootSearch: boolean;
+  properties: string;
 
   // AbstractPlatformAwareModelCommand
   selectCurrentPlatform: boolean;
