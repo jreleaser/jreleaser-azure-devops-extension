@@ -59,7 +59,7 @@ stages:
             fi
     - task: JReleaserInstaller@0
       inputs:
-        version: 'latest'
+        version: '1.5.1'
     - ${{if eq(parameters.releaseType, 'EarlyAccess')}}:
       - task: JReleaserInvoker@0
         env:
