@@ -22,9 +22,6 @@ release:
       sort: DESC
       append:
         enabled: true
-    prerelease:
-      enabled: true
-      pattern: .*-earlyaccess*
   
 files:
   artifacts: 

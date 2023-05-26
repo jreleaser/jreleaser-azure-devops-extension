@@ -102,16 +102,13 @@ stages:
     steps:
     - checkout: self
       fetchTags: true
+      clean: true
     - task: CmdLine@2
       displayName: 'get Early Access version'
       inputs:
         script: |
-          latest_tag=$(git tag -l --sort=-v:refname | head -n 1)
-          if [[ $latest_tag == *"earlyaccess"* ]]; then
-            echo "##vso[task.setvariable variable=earlyaccessVer]$latest_tag"
-          else
-            echo "##vso[task.setvariable variable=earlyaccessVer]$(echo $latest_tag | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')-earlyaccess"
-          fi
+          latest_tag=$(git tag -l --sort=-v:refname | grep -v "early-access" | head -n 1)
+          echo "##vso[task.setvariable variable=earlyaccessVer]$(echo $latest_tag | awk -F. '{$2 = $2 + 1; $3 = 0;} 1' | sed 's/ /./g')-earlyaccess"
     - task: DownloadPipelineArtifact@2
       displayName: 'Download JReleaserExtension'
       inputs:
