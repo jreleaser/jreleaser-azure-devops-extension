@@ -8,12 +8,6 @@ export abstract class AbstractCommand implements ICommand {
 
   constructor(protected toolrunner: toolrunner.ToolRunner) {}
 
-  async run(ctx: ITaskContext): Promise<CommandResponse> {
-    this.setupCommon(ctx);
-    this.initialize(ctx);
-    return await this.exec();
-  }
-
   private setupCommon(ctx: ITaskContext): void {
     for (const arg of ctx.arguments.split(' ')) {
       this.options.push(arg);
@@ -21,6 +15,7 @@ export abstract class AbstractCommand implements ICommand {
   }
 
   public initialize(ctx: ITaskContext): void {
+    this.setupCommon(ctx);
     this.setup(ctx);
   }
 
