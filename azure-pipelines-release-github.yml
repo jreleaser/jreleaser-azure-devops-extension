@@ -64,7 +64,6 @@ stages:
           JRELEASER_OVERWRITE: true
         inputs:
           command: 'release'
-          arguments: '--auto-config --prerelease'
     - ${{if eq(parameters.releaseType, 'Release')}}:
       - task: JReleaserInvoker@0
         env:

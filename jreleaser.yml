@@ -16,6 +16,9 @@ release:
     owner: shblue21
     overwrite: true
     branch: main
+    prerelease:
+      enabled: true
+      pattern: *-earlyaccess
     changelog:
       formatted: ALWAYS
       preset: conventional-commits
