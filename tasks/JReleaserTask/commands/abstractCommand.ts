@@ -9,8 +9,10 @@ export abstract class AbstractCommand implements ICommand {
   constructor(protected toolrunner: toolrunner.ToolRunner) {}
 
   private setupCommon(ctx: ITaskContext): void {
-    for (const arg of ctx.arguments.split(' ')) {
-      this.options.push(arg);
+    if (ctx.arguments) {
+      for (const arg of ctx.arguments.split(' ')) {
+        this.options.push(arg);
+      }
     }
   }
 
