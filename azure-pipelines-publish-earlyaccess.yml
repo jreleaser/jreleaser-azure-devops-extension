@@ -17,7 +17,8 @@ variables:
   marketplace_publisher: 'jreleaser'
   marketplace_extensionName: 'JReleaser-EarlyAccess'
   marketplace_extensionId: 'jreleaser-azure-devops-extension-earlyaccess'
-  marketplace_share_with: 'shblue21'
+  marketplace_share_with: 'JReleaser'
+  install_account: 'https://dev.azure.com/JReleaser'
 
 stages:
 - stage: Build
@@ -152,7 +153,7 @@ stages:
         connectedServiceName: 'jreleaser_publish'
         publisherId: 'JReleaser'
         extensionId: '$(marketplace_extensionId)'
-        accounts: 'https://dev.azure.com/shblue21'
+        accounts: '$(install_account)'
     - publish: 'jreleaser-azure-devops-extension.vsix'
       artifact: JReleaserExtension-vsix
     # wait for 1 minute to allow the extension to be installed

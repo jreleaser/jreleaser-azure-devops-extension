@@ -17,17 +17,12 @@ variables:
   marketplace_publisher: 'jreleaser'
   marketplace_extensionName: 'JReleaser'
   marketplace_extensionId: 'jreleaser-azure-devops-extension'
-  marketplace_share_with: 'shblue21'
   
 stages:
 - stage: Build
   jobs:
   - job: Build_JReleaser_Installer
     steps:
-    - checkout: self
-      persistCredentials: true
-      fetchTags: true
-      fetchDepth: 0
     - task: Npm@1
       displayName: 'install'
       inputs:
@@ -53,10 +48,6 @@ stages:
 
   - job: Build_JReleaser_Task
     steps:
-    - checkout: self
-      persistCredentials: true
-      fetchTags: true
-      fetchDepth: 0  
     - task: Npm@1
       displayName: 'install'
       inputs:
@@ -110,6 +101,7 @@ stages:
     steps:
     - checkout: self
       fetchTags: true
+      clean: true
     - script: |
         if [[ "$(Build.SourceBranch)" != refs/tags/* ]]; then
           echo "Build was not triggered by a tag, exiting."
