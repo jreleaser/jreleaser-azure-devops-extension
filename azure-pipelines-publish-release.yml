@@ -119,13 +119,6 @@ stages:
       inputs:
         version: '0.14.x'
         checkLatest: true
-    - task: UnpublishAzureDevOpsExtension@4
-      inputs:
-        connectTo: 'VsTeam'
-        connectedServiceName: 'jreleaser_publish'
-        method: 'id'
-        publisherId: 'JReleaser'
-        extensionId: '$(marketplace_extensionId)'
     - task: PackageAzureDevOpsExtension@4
       inputs:
         rootFolder: '$(System.DefaultWorkingDirectory)'
