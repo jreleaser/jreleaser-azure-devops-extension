@@ -1,6 +1,6 @@
 {
   "name": "jreleaser-azure-devops-extension",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "JReleaser task for Azure DevOps",
   "scripts": {
     "package:test": "tfx extension create --manifest-globs vss-extension.json",
@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shblue21/jreleaser-azure-devops-extension.git"
+    "url": "git+https://github.com/JReleaser/jreleaser-azure-devops-extension.git"
   },
   "keywords": [],
   "author": "JIHUN KIM",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shblue21/jreleaser-azure-devops-extension/issues"
+    "url": "https://github.com/JReleaser/jreleaser-azure-devops-extension/issues"
   },
-  "homepage": "https://github.com/shblue21/jreleaser-azure-devops-extension#readme",
+  "homepage": "https://github.com/JReleaser/jreleaser-azure-devops-extension#readme",
   "devDependencies": {
     "prettier": "2.8.4"
   }

@@ -13,7 +13,7 @@ project:
 
 release:
   github:
-    owner: shblue21
+    owner: JReleaser
     overwrite: true
     branch: main
     prerelease:
