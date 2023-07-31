@@ -1,10 +1,11 @@
 import * as toolLib from 'azure-pipelines-tool-lib/tool';
 import * as tl from 'azure-pipelines-task-lib/task';
+import * as webClient from 'azure-pipelines-tasks-azure-arm-rest-v2/webClient';
 import * as os from 'os';
 import * as path from 'path';
 import * as util from 'util';
 
-import axios from 'axios';
+var packagejson = require('./package.json');
 
 const osPlat: string = os.platform();
 const osArch: string = os.arch();
@@ -120,8 +121,14 @@ function getDownloadUrl(version: string, filename: string): string {
 
 async function getlatestVersion(): Promise<string> {
   const url = 'https://jreleaser.org/releases/latest/download/VERSION';
-  const version = await axios.get(url).then(response => response.data);
-
+  let request = new webClient.WebRequest();
+  request.uri = url;
+  request.method = 'GET';
+  request.headers = request.headers || {};
+  request.headers['User-Agent'] = 'jreleaser-installer-task' + packagejson.version;
+  // const version = await axios.get(url).then(response => response.data);
+  const response = await webClient.sendRequest(request);
+  const version = response.body;
   return version.replace(/[\n\r]+/g, '');
 }
 
