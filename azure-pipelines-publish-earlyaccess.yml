@@ -43,7 +43,7 @@ stages:
         Contents: |
           **/*
           !**/*.ts
-          !tests/**
+          !**/tests/**
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
     - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: JReleaserInstaller
@@ -68,7 +68,7 @@ stages:
         contents: |
           **/*
           !**/*.ts
-          !tests/**
+          !**/tests/**
         targetFolder: $(Build.ArtifactStagingDirectory)
     - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: JReleaserTask
