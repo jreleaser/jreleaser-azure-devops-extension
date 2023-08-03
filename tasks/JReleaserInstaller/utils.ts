@@ -2,8 +2,8 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as toolLib from 'azure-pipelines-tool-lib/tool';
+import axios from 'axios';
 import * as tl from 'azure-pipelines-task-lib/task';
-import * as webClient from 'azure-pipelines-tasks-azure-arm-rest-v2/webClient';
 
 var packagejson = require('./package.json');
 const userAgent: string = 'kubelogin-installer-task-' + packagejson.version;
@@ -39,14 +39,12 @@ export function resolvePlatform(): Platform {
   }
 
   export async function getLatestVersion(): Promise<string> {
-    let request = new webClient.WebRequest();
-    request.uri = 'https://api.github.com/repos/jreleaser/jreleaser/releases/latest';
-    request.method = 'GET';
-    request.headers = request.headers || {};
-    request.headers['User-Agent'] = userAgent;
-
-    const response = await webClient.sendRequest(request);
-    return response.body['tag_name'];
+    const response = await axios.get('https://api.github.com/repos/jreleaser/jreleaser/releases/latest', {
+      headers: {
+        'User-Agent': userAgent
+      }
+    });
+    return response.data['tag_name'];
   }
 
   export async function getJReleaserRelease(version: string, standalone: boolean, platform?: Platform, ): Promise<JReleaserRelease> {
@@ -70,16 +68,14 @@ export function resolvePlatform(): Platform {
     const chksum = 'checksums_sha256'
 
     try{
-      let request = new webClient.WebRequest();
-      request.uri = 'https://api.github.com/repos/jreleaser/jreleaser/releases/tags/'+tagVersion;
-      request.method = 'GET';
-      request.headers = request.headers || {};
-      request.headers['User-Agent'] = userAgent;
+      const response = await axios.get(`https://api.github.com/repos/jreleaser/jreleaser/releases/tags/${tagVersion}`, {
+        headers: {
+          'User-Agent': userAgent
+        }
+      });
 
-      const response = await webClient.sendRequest(request);
-
-      const releaseUrl: string = response.body['assets'].find((asset: any ) => asset.name.includes(releaseName))?.browser_download_url || '';
-      const chksumUrl: string = response.body['assets'].find((asset: any ) => asset.name.includes(chksum))?.browser_download_url || '';
+      const releaseUrl: string = response.data['assets'].find((asset: any ) => asset.name.includes(releaseName))?.browser_download_url || '';
+      const chksumUrl: string = response.data['assets'].find((asset: any ) => asset.name.includes(chksum))?.browser_download_url || '';
 
       return {
         version: version,
