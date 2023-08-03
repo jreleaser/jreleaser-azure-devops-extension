@@ -37,7 +37,6 @@ stages:
         Contents: |
           **/*
           !**/*.ts
-          !tests/**
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
     - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: JReleaserInstaller
@@ -62,7 +61,6 @@ stages:
         contents: |
           **/*
           !**/*.ts
-          !tests/**
         targetFolder: $(Build.ArtifactStagingDirectory)
     - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: JReleaserTask
@@ -88,3 +86,31 @@ stages:
           !**/*.ts
         targetFolder: $(Build.ArtifactStagingDirectory)
         overWrite: true
+- stage: Test
+  jobs:
+  - job: Test_JReleaser_Installer
+    steps:
+    - task: Npm@1
+      displayName: 'install'
+      inputs:
+        command: install
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
+    - task: Npm@1
+      displayName: 'test'
+      inputs:
+        command: custom
+        customCommand: 'run test'
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
+  - job: Test_JReleaser_Task
+    steps:
+    - task: Npm@1
+      displayName: 'install'
+      inputs:
+        command: install
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
+    - task: Npm@1
+      displayName: 'test'
+      inputs:
+        command: custom
+        customCommand: 'run test'
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
