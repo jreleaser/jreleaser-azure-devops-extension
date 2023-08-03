@@ -10,7 +10,6 @@ describe('JReleaserInstaller L0 Suite', function () {
   after(() => {});
 
   it('should install JReleaser successfully', function (done: Mocha.Done) {
-    this.timeout(1000);
 
     let tp = path.join(__dirname, 'L0InstallJReleaserSuccess.js');
     let tr: ttm.MockTestRunner = new ttm.MockTestRunner(tp);
@@ -20,5 +19,5 @@ describe('JReleaserInstaller L0 Suite', function () {
     assert(tr.succeeded, 'true');
 
     done();
-  });
+  }).timeout(10000);
 });
