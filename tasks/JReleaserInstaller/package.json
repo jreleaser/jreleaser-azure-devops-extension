@@ -5,7 +5,8 @@
   "main": "./dist/installer.js",
   "scripts": {
     "build": "tsc --build",
-    "clean": "tsc --build --clean"
+    "clean": "tsc --build --clean",
+    "test": "tsc --build && mocha ./dist/tests/L0.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,11 @@
     "azure-pipelines-tool-lib": "^2.0.1"
   },
   "devDependencies": {
-    "@types/node": "^16.18.14"
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^16.18.14",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "ts-node": "^10.9.1"
   }
 }
