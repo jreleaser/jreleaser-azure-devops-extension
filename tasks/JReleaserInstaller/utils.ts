@@ -1,6 +1,4 @@
 import * as os from 'os';
-import * as path from 'path';
-import * as fs from 'fs';
 import * as toolLib from 'azure-pipelines-tool-lib/tool';
 import axios from 'axios';
 import * as tl from 'azure-pipelines-task-lib/task';
@@ -91,13 +89,9 @@ export function resolvePlatform(): Platform {
 
   export async function downloadJReleaserRelease(release: JReleaserRelease): Promise<string> {
     try{
-      let downloadPath = await toolLib.downloadTool(release.releaseUrl);
-      // change file name to jreleaser.zip from `downloadPath`
-      const newDownloadPath = path.join(path.dirname(downloadPath), 'jreleaser.zip');
-      await fs.promises.rename(downloadPath, newDownloadPath);
-
-      tl.debug(`Downloaded JReleaser release: ${newDownloadPath}`);
-      return newDownloadPath;
+      let downloadPath = await toolLib.downloadTool(release.releaseUrl, release.name);
+      tl.debug(`Downloaded JReleaser release: ${downloadPath}`);
+      return downloadPath;
     } catch (error) {
       tl.debug(`Failed to download JReleaser release: ${error}`);
       throw new Error(`Failed to download JReleaser release: ${error}`);

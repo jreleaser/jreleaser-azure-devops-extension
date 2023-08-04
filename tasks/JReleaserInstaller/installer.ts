@@ -1,8 +1,6 @@
 import * as toolLib from 'azure-pipelines-tool-lib/tool';
 import * as tl from 'azure-pipelines-task-lib/task';
-import * as os from 'os';
 import * as path from 'path';
-import * as util from 'util';
 
 import { getLatestVersion, getJReleaserRelease, downloadJReleaserRelease, unzipJReleaserRelease, JReleaserRelease  } from './utils';
 
@@ -21,17 +19,19 @@ async function run() {
     console.log(`Checksum URL: ${jreleaserRelease.checksumUrl}`);
 
     let toolPath: string = toolLib.findLocalTool(TOOL_NAME, version);
+    let toolFilePath: string;
     if(toolPath) {
       console.log(`JReleaser ${version} was found in the local cache`);
+      toolFilePath = path.join(toolPath, jreleaserRelease.name);
     } else {
       console.log(`JReleaser ${version} was not found in the local cache, downloading...`);
-      toolPath = await downloadJReleaserRelease(jreleaserRelease);
+      let downloadFile: string = await downloadJReleaserRelease(jreleaserRelease);
       console.log(`JReleaser ${version} was downloaded to ${toolPath}`);
-      toolLib.cacheFile(toolPath, jreleaserRelease.name, TOOL_NAME, version);
+      toolFilePath = path.join(await toolLib.cacheFile(downloadFile, jreleaserRelease.name, TOOL_NAME, version), jreleaserRelease.name);
     }
 
     if(standAlone) {
-      const unzipPath: string = await unzipJReleaserRelease(toolPath);
+      const unzipPath: string = await unzipJReleaserRelease(path.join(toolFilePath));
       toolLib.prependPath(path.join(unzipPath, 'bin'));
     } else {
       console.log('TODO: Add support for jreleaser-tool-provider');

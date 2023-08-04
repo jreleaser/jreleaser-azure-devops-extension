@@ -40,8 +40,8 @@ tmr.registerMock(`./utils`, {
   },
   downloadJReleaserRelease: function (A) {
     return new Promise(async (resolve, reject) => {
-      fs.writeFileSync(path.join(tempDir, 'jreleaser.zip'), 'fake zip file');
-      resolve(path.join(tempDir, 'jreleaser.zip'));
+      fs.writeFileSync(path.join(tempDir, 'jreleaser-standalone-1.7.0-linux-x86_64.zip'), 'fake zip file');
+      resolve(path.join(tempDir, 'jreleaser-standalone-1.7.0-linux-x86_64.zip'));
     });
   },
   unzipJReleaserRelease: function (A) {
@@ -89,7 +89,9 @@ const a: ma.TaskLibAnswers = <ma.TaskLibAnswers>{
     'jreleaser': true,
   },
   exist: {
-    [path.join(tempDir, 'jreleaser.zip')]: true,
+    [path.join(tempDir, 'jreleaser-standalone-1.7.0-windows-x86_64')]: true,
+    [path.join(tempDir, 'jreleaser-standalone-1.7.0-linux-x86_64')]: true,
+    [path.join(tempDir, 'jreleaser-standalone-1.7.0-osx-x86_64')]: true,
   },
   which: {
     jreleaser: 'jreleaser'
