@@ -41,7 +41,8 @@ export function resolvePlatform(): Platform {
         'User-Agent': userAgent
       }
     });
-    return response.data['tag_name'];
+    tl.debug(`Latest JReleaser version: ${response.data['tag_name']}`);
+    return response.data['tag_name'].replace('v', '');
   }
 
   export async function getJReleaserRelease(version: string, standalone: boolean, platform?: Platform, ): Promise<JReleaserRelease> {
@@ -56,7 +57,7 @@ export function resolvePlatform(): Platform {
     }
 
     if(!version.startsWith('v')) {
-      tagVersion = 'v' + tagVersion;
+      tagVersion = 'v' + version;
     }
 
     platform = platform || resolvePlatform();
