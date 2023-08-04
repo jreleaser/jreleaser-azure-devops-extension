@@ -26,13 +26,15 @@ async function run() {
     } else {
       console.log(`JReleaser ${version} was not found in the local cache, downloading...`);
       let downloadFile: string = await downloadJReleaserRelease(jreleaserRelease);
-      console.log(`JReleaser ${version} was downloaded to ${toolPath}`);
+      console.log(`JReleaser ${version} was downloaded to ${downloadFile}`);
       toolFilePath = path.join(await toolLib.cacheFile(downloadFile, jreleaserRelease.name, TOOL_NAME, version), jreleaserRelease.name);
     }
 
     if(standAlone) {
       const unzipPath: string = await unzipJReleaserRelease(path.join(toolFilePath));
-      toolLib.prependPath(path.join(unzipPath, 'bin'));
+
+      console.log(`ADD ToolLib Path: ${path.join(unzipPath,jreleaserRelease.name,'bin')}`);
+      toolLib.prependPath(path.join(unzipPath,jreleaserRelease.name,'bin'));
     } else {
       console.log('TODO: Add support for jreleaser-tool-provider');
       // TODO: Add support for jreleaser-tool-provider
