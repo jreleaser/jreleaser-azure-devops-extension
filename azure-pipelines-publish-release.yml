@@ -26,7 +26,8 @@ stages:
     - task: Npm@1
       displayName: 'install'
       inputs:
-        command: install --production
+        command: 'custom'
+        customCommand: 'install --production'
         workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
     - task: Npm@1
       displayName: 'build'
@@ -51,7 +52,8 @@ stages:
     - task: Npm@1
       displayName: 'install'
       inputs:
-        command: install --production
+        command: 'custom'
+        customCommand: 'install --production'
         workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
     - task: Npm@1
       displayName: 'build'
