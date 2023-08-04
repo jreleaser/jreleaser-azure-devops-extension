@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "jreleaser-azure-devops-extension",
   "publisher": "JReleaser",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "JReleaser",
   "description": "Task to install and run JReleaser with Azure Pipelines",
   "public": false,

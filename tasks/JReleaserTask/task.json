@@ -3,13 +3,13 @@
   "name": "JReleaserInvoker",
   "friendlyName": "JReleaser Invoker",
   "description": "Invoke JReleaser commands",
-  "author": "JIHUN KIM",
+  "author": "JReleaser",
   "minimumAgentVersion": "2.144.0",
   "helpMarkDown": "",
   "category": "Tool",
   "version": {
     "Major": "0",
-    "Minor": "1",
+    "Minor": "2",
     "Patch": "0"
   },
   "demands": [],

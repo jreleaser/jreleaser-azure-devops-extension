@@ -3,13 +3,13 @@
   "name": "JReleaserInstaller",
   "friendlyName": "JReleaser Installer",
   "description": "Installs JReleaser for JReleaser integration tasks.",
-  "author": "JIHUN KIM",
+  "author": "JReleaser",
   "helpMarkDown": "Installs JReleaser for JReleaser integration tasks.",
   "category": "Tool",
   "minimumAgentVersion": "2.144.0",
   "version": {
     "Major": "0",
-    "Minor": "1",
+    "Minor": "2",
     "Patch": "0"
   },
   "demands": [],
