@@ -4,9 +4,9 @@
   "private": true,
   "main": "./dist/installer.js",
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc --project tsconfig.json",
     "clean": "tsc --build --clean",
-    "test": "tsc --build && mocha ./dist/tests/L0.js"
+    "test": "tsc --project tsconfig.test.json && mocha ./dist/tests/L0.js"
   },
   "keywords": [],
   "author": "",

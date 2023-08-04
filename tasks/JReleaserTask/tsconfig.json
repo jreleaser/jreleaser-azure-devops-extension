@@ -6,6 +6,6 @@
     "outDir": "./dist",
     "useUnknownInCatchVariables": false
   },
-  "include": ["./**/*.ts"]
-
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "tests"]
 }
