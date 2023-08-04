@@ -5,8 +5,7 @@ import * as toolLib from 'azure-pipelines-tool-lib/tool';
 import axios from 'axios';
 import * as tl from 'azure-pipelines-task-lib/task';
 
-var packagejson = require('./package.json');
-const userAgent: string = 'kubelogin-installer-task-' + packagejson.version;
+const userAgent: string = 'kubelogin-installer-task';
 
 export type Platform = 'osx-aarch64' | 'osx-x86_64' | 'linux-aarch64' | 'linux-x86_64' | 'windows-aarch64' | 'windows-x86_64';
 
