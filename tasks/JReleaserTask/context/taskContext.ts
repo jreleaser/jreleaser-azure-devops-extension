@@ -3,22 +3,13 @@ import * as tasks from 'azure-pipelines-task-lib/task';
 
 export default class TaskContext implements ITaskContext {
   private getInput: (name: string, required?: boolean | undefined) => string;
-  private getBoolInput: (
-    name: string,
-    required?: boolean | undefined,
-  ) => boolean;
+  private getBoolInput: (name: string, required?: boolean | undefined) => boolean;
 
   public getVariable: (name: string) => string | undefined;
-  public setVariable: (
-    name: string,
-    val: string,
-    secret?: boolean | undefined,
-  ) => void;
+  public setVariable: (name: string, val: string, secret?: boolean | undefined) => void;
 
   constructor() {
-    this.getInput = <(name: string, required?: boolean | undefined) => string>(
-      tasks.getInput
-    );
+    this.getInput = <(name: string, required?: boolean | undefined) => string>tasks.getInput;
     this.getBoolInput = tasks.getBoolInput;
     this.getVariable = tasks.getVariable;
     this.setVariable = tasks.setVariable;
@@ -82,7 +73,7 @@ export default class TaskContext implements ITaskContext {
   get excludeDistribution() {
     return this.getInput('excludeDistribution');
   }
-  
+
   get excludePackager() {
     return this.getInput('excludePackager');
   }
@@ -129,7 +120,7 @@ export default class TaskContext implements ITaskContext {
   get templateEvalInputFile() {
     return this.getInput('templateEvalInputFile');
   }
-  
+
   get templateEvalType() {
     return this.getInput('templateEvalType');
   }

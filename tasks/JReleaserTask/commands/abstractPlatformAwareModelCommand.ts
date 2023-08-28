@@ -7,7 +7,7 @@ export abstract class AbstractPlatformAwareModelCommand extends AbstractModelCom
     this.buildOptions(ctx, {
       selectCurrentPlatform: '--select-current-platform',
       selectPlatform: '--select-platform',
-      rejectPlatform: '--reject-platform'
+      rejectPlatform: '--reject-platform',
     });
   }
 }

@@ -7,7 +7,7 @@ export interface ITaskContext {
 
   // AbstractModelCommand
   configFile: String;
-  strict: boolean; 
+  strict: boolean;
   gitRootSearch: boolean;
   properties: string;
 
@@ -29,14 +29,13 @@ export interface ITaskContext {
   // Config Arguments
   configType: string;
   configFull: boolean;
-  
+
   // Template Eval Arguments
   templateEvalTargetDirectory: string;
   templateEvalOverwrite: boolean;
   templateEvalInputType: string;
   templateEvalInput: string;
   templateEvalType: string;
-
 }
 
 export { default as TaskContext } from './taskContext';

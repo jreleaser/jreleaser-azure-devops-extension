@@ -11,10 +11,7 @@ const task = new Task(taskContext);
 task
   .run()
   .then(() => {
-    tasks.setResult(
-      tasks.TaskResult.Succeeded,
-      'JReleaser task completed successfully',
-    );
+    tasks.setResult(tasks.TaskResult.Succeeded, 'JReleaser task completed successfully');
   })
   .catch(error => {
     tasks.setResult(tasks.TaskResult.Failed, error.message);

@@ -42,12 +42,7 @@ export class JReleaserFullRelease extends AbstractPlatformAwareModelCommand {
     if (runnerResult.code === 0) {
       return Promise.resolve(new CommandResponse(0));
     } else {
-      return Promise.reject(
-        new CommandResponse(
-          1,
-          `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`,
-        ),
-      );
+      return Promise.reject(new CommandResponse(1, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`));
     }
   }
 }

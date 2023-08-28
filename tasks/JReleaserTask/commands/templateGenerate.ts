@@ -10,7 +10,7 @@ export class JReleaserTemplateGenerate extends AbstractLoggingCommand {
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('template','generate');
+    this.options.unshift('template', 'generate');
     if (ctx.distribution && ctx.distribution !== '') {
       this.options.push('--distribution');
       this.options.push(ctx.distribution);
@@ -39,12 +39,7 @@ export class JReleaserTemplateGenerate extends AbstractLoggingCommand {
     if (runnerResult.code === 0) {
       return Promise.resolve(new CommandResponse(0));
     } else {
-      return Promise.reject(
-        new CommandResponse(
-          1,
-          `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`,
-        ),
-      );
+      return Promise.reject(new CommandResponse(1, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`));
     }
   }
 }

@@ -5,10 +5,7 @@ export interface ICommand {
   exec(): Promise<CommandResponse>;
 }
 export class CommandResponse {
-  constructor(
-    public readonly status: CommandStatus,
-    public readonly message?: string,
-  ) {}
+  constructor(public readonly status: CommandStatus, public readonly message?: string) {}
 }
 
 export enum CommandStatus {
