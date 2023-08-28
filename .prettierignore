@@ -3,3 +3,5 @@
 **/.vscode
 **/*.md
 node_modules
+**/*.yml
+**/*.json

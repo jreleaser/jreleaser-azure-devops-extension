@@ -4,7 +4,8 @@
   "description": "JReleaser task for Azure DevOps",
   "scripts": {
     "package:test": "tfx extension create --manifest-globs vss-extension.json",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format-check": "prettier --check ."
   },
   "repository": {
     "type": "git",
