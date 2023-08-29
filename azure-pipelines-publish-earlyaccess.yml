@@ -150,13 +150,6 @@ stages:
         vsixFile: 'jreleaser-azure-devops-extension.vsix'
         updateTasksVersion: false
         shareWith: "$(marketplace_share_with),$(marketplace_share_with_author)"
-    - task: InstallAzureDevOpsExtension@4
-      displayName: 'Install JReleaser Dev Extension'
-      inputs:
-        connectedServiceName: 'jreleaser_publish'
-        publisherId: 'JReleaser'
-        extensionId: '$(marketplace_extensionId)'
-        accounts: '$(install_account)'
     - publish: 'jreleaser-azure-devops-extension.vsix'
       artifact: JReleaserExtension-vsix
     # wait for 1 minute to allow the extension to be installed
