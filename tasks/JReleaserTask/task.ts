@@ -2,12 +2,14 @@ import * as commands from './commands';
 import { ITaskContext } from './context';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
 import * as tasks from 'azure-pipelines-task-lib/task';
+import { ILogger } from './logger';
 
 export class Task {
   private readonly commands: { [name: string]: commands.ICommand };
   private readonly toolrunner: toolrunner.ToolRunner;
+  private logger: ILogger;
 
-  constructor(private readonly ctx: ITaskContext) {
+  constructor(private readonly ctx: ITaskContext, logger: ILogger) {
     this.toolrunner = JReleaserToolFactory.createJReleaserTool();
     this.commands = {
       init: new commands.JReleaserInitHandler(this.toolrunner),
@@ -34,17 +36,23 @@ export class Task {
     };
   }
 
-  public async run(): Promise<void> {
+  public async run(): Promise<commands.CommandResponse> {
     const command = this.commands[this.ctx.command];
+    this.logger.debug(`Executing command: ${this.ctx.command}`);
+    let response: commands.CommandResponse;
     if (!command) {
+      this.logger.error(`Unknown command: ${this.ctx.command}`);
       throw new Error(`Unknown command: ${this.ctx.command}`);
     }
-
-    command.initialize(this.ctx);
-    const response = await command.exec();
-    if (response.status === commands.CommandStatus.Failed) {
-      throw new Error(response.message);
+    try {
+      command.initialize(this.ctx);
+      this.logger.debug(`Executing options: ${command.options.join(' ')}`);
+      response = await command.exec();
+    } catch (error) {
+      response = new commands.CommandResponse(commands.CommandStatus.Failed, error.message);
+      this.logger.error(error.message);
     }
+    return response;
   }
 }
 

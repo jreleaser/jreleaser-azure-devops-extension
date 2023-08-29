@@ -3,6 +3,7 @@ import { ITaskContext } from '../context';
 export interface ICommand {
   initialize(ctx: ITaskContext): void;
   exec(): Promise<CommandResponse>;
+  options: string[];
 }
 export class CommandResponse {
   constructor(public readonly status: CommandStatus, public readonly message?: string) {}

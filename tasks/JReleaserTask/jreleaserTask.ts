@@ -1,17 +1,26 @@
 import * as tasks from 'azure-pipelines-task-lib/task';
 import { TaskContext } from './context';
 import { Task } from './task';
+import TaskLogger from './logger/taskLogger';
+import { CommandResponse, CommandStatus } from './commands';
 
-tasks.debug('Starting JReleaser task');
 const taskContext = new TaskContext();
-tasks.debug('commands: ' + taskContext.command);
+const logger = new TaskLogger(taskContext);
+const task = new Task(taskContext, logger);
 
-const task = new Task(taskContext);
+logger.debug('Starting JReleaser task');
 
 task
   .run()
-  .then(() => {
-    tasks.setResult(tasks.TaskResult.Succeeded, 'JReleaser task completed successfully');
+  .then((response: CommandResponse) => {
+    switch (response.status) {
+      case CommandStatus.Success:
+        tasks.setResult(tasks.TaskResult.Succeeded, 'JReleaser task completed successfully');
+        break;
+      case CommandStatus.Failed:
+        tasks.setResult(tasks.TaskResult.Failed, response.message);
+        break;
+    }
   })
   .catch(error => {
     tasks.setResult(tasks.TaskResult.Failed, error.message);
