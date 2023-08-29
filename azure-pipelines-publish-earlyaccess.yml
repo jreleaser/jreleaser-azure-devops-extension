@@ -18,6 +18,7 @@ variables:
   marketplace_extensionName: 'JReleaser-EarlyAccess'
   marketplace_extensionId: 'jreleaser-azure-devops-extension-earlyaccess'
   marketplace_share_with: 'JReleaser'
+  marketplace_share_with_author: 'shblue21'
   install_account: 'https://dev.azure.com/JReleaser'
 
 stages:
@@ -148,7 +149,7 @@ stages:
         fileType: 'vsix'
         vsixFile: 'jreleaser-azure-devops-extension.vsix'
         updateTasksVersion: false
-        shareWith: '$(marketplace_share_with)'
+        shareWith: "$(marketplace_share_with),$(marketplace_share_with_author)"
     - task: InstallAzureDevOpsExtension@4
       displayName: 'Install JReleaser Dev Extension'
       inputs:
