@@ -2,9 +2,9 @@ import { ITaskContext } from '../context';
 import { AbstractPlatformAwareModelCommand } from './abstractPlatformAwareModelCommand';
 
 export abstract class AbstractPackagerModelCommand extends AbstractPlatformAwareModelCommand {
-  public initialize(ctx: ITaskContext): void {
+  override initialize(ctx: ITaskContext): void {
     super.initialize(ctx);
-    this.buildOptions(ctx, {
+    this.setupCommandOptions(ctx, {
       distribution: '--distribution',
       packager: '--packager',
       excludeDistribution: '--exclude-distribution',

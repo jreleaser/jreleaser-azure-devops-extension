@@ -1,6 +1,5 @@
-import { CommandResponse } from '.';
+import { CommandResponse, CommandStatus } from '.';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
-import * as tasks from 'azure-pipelines-task-lib/task';
 import { ITaskContext } from '../context';
 import { AbstractDistributionModelCommand } from './abstractDistributionModelCommand';
 
@@ -10,20 +9,19 @@ export class JReleaserChecksum extends AbstractDistributionModelCommand {
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('checksum');
+    this.setCommand('checksum');
   }
 
   exec(): Promise<CommandResponse> {
-    for (const option of this.options) {
-      this.toolrunner.arg(option);
-    }
-    tasks.debug(`Running JReleaser with options: ${this.options.join(' ')}`);
+    this.setupToolRunnerArguments(this.toolrunner);
 
     const runnerResult = this.toolrunner.execSync();
     if (runnerResult.code === 0) {
-      return Promise.resolve(new CommandResponse(0));
+      return Promise.resolve(new CommandResponse(CommandStatus.Success, 'JReleaser checksum successfully'));
     } else {
-      return Promise.reject(new CommandResponse(1, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`));
+      return Promise.reject(
+        new CommandResponse(CommandStatus.Failed, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`),
+      );
     }
   }
 }

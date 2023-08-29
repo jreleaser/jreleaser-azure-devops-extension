@@ -1,7 +1,6 @@
-import { CommandResponse } from '.';
+import { CommandResponse, CommandStatus } from '.';
 import { ITaskContext } from '../context';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
-import * as tasks from 'azure-pipelines-task-lib/task';
 import { AbstractPackagerModelCommand } from './abstractPackagerModelCommand';
 
 export class JReleaserPrepare extends AbstractPackagerModelCommand {
@@ -10,20 +9,19 @@ export class JReleaserPrepare extends AbstractPackagerModelCommand {
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('prepare');
+    this.setCommand('prepare');
   }
 
   exec(): Promise<CommandResponse> {
-    for (const option of this.options) {
-      this.toolrunner.arg(option);
-    }
-    tasks.debug(`Running JReleaser with options: ${this.options.join(' ')}`);
+    this.setupToolRunnerArguments(this.toolrunner);
 
     const runnerResult = this.toolrunner.execSync();
     if (runnerResult.code === 0) {
-      return Promise.resolve(new CommandResponse(0));
+      return Promise.resolve(new CommandResponse(CommandStatus.Success, 'JReleaser initialized successfully'));
     } else {
-      return Promise.reject(new CommandResponse(1, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`));
+      return Promise.reject(
+        new CommandResponse(CommandStatus.Failed, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`),
+      );
     }
   }
 }

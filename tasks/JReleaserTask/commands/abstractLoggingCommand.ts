@@ -10,10 +10,10 @@ export abstract class AbstractLoggingCommand extends AbstractCommand {
     this._logOption = value;
   }
 
-  public initialize(ctx: ITaskContext): void {
+  override initialize(ctx: ITaskContext): void {
     super.initialize(ctx);
     this.setupLogOption(ctx);
-    this.options.push(this.logOption);
+    this.addOption(this.logOption);
     this.setupBaseDirectory(ctx);
   }
 

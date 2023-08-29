@@ -1,7 +1,6 @@
-import { CommandResponse } from '.';
+import { CommandResponse, CommandStatus } from '.';
 import { ITaskContext } from '../context';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
-import * as tasks from 'azure-pipelines-task-lib/task';
 import { AbstractPackagerModelCommand } from './abstractPackagerModelCommand';
 
 export class JReleaserPublish extends AbstractPackagerModelCommand {
@@ -10,23 +9,22 @@ export class JReleaserPublish extends AbstractPackagerModelCommand {
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('publish');
+    this.setCommand('publish');
     if (ctx.dryRun) {
-      this.options.push('--dry-run');
+      this.addOption('--dry-run');
     }
   }
 
   exec(): Promise<CommandResponse> {
-    for (const option of this.options) {
-      this.toolrunner.arg(option);
-    }
-    tasks.debug(`Running JReleaser with options: ${this.options.join(' ')}`);
+    this.setupToolRunnerArguments(this.toolrunner);
 
     const runnerResult = this.toolrunner.execSync();
     if (runnerResult.code === 0) {
-      return Promise.resolve(new CommandResponse(0));
+      return Promise.resolve(new CommandResponse(CommandStatus.Success, 'JReleaser publish successfully'));
     } else {
-      return Promise.reject(new CommandResponse(1, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`));
+      return Promise.reject(
+        new CommandResponse(CommandStatus.Failed, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`),
+      );
     }
   }
 }

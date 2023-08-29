@@ -1,6 +1,5 @@
-import { CommandResponse } from '.';
+import { CommandResponse, CommandStatus } from '.';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
-import * as tasks from 'azure-pipelines-task-lib/task';
 import { ITaskContext } from '../context';
 import { AbstractModelCommand } from './abstractModelCommand';
 
@@ -10,23 +9,22 @@ export class JReleaserDownload extends AbstractModelCommand {
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('download');
+    this.setCommand('download');
     if (ctx.dryRun) {
-      this.options.push('--dry-run');
+      this.addOption('--dry-run');
     }
   }
 
   exec(): Promise<CommandResponse> {
-    for (const option of this.options) {
-      this.toolrunner.arg(option);
-    }
-    tasks.debug(`Running JReleaser with options: ${this.options.join(' ')}`);
+    this.setupToolRunnerArguments(this.toolrunner);
 
     const runnerResult = this.toolrunner.execSync();
     if (runnerResult.code === 0) {
-      return Promise.resolve(new CommandResponse(0));
+      return Promise.resolve(new CommandResponse(CommandStatus.Success, 'JReleaser downloaded successfully'));
     } else {
-      return Promise.reject(new CommandResponse(1, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`));
+      return Promise.reject(
+        new CommandResponse(CommandStatus.Failed, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`),
+      );
     }
   }
 }

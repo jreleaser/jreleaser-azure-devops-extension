@@ -1,6 +1,5 @@
-import { CommandResponse } from '.';
+import { CommandResponse, CommandStatus } from '.';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
-import * as tasks from 'azure-pipelines-task-lib/task';
 import { ITaskContext } from '../context';
 import { AbstractPlatformAwareModelCommand } from './abstractPlatformAwareModelCommand';
 
@@ -10,28 +9,27 @@ export class JReleaserAssemble extends AbstractPlatformAwareModelCommand {
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('assemble');
+    this.setCommand('assemble');
     if (ctx.distribution && ctx.distribution !== '') {
-      this.options.push('--distribution');
-      this.options.push(ctx.distribution);
+      this.addOption('--distribution');
+      this.addOption(ctx.distribution);
     }
     if (ctx.excludeDistribution && ctx.excludeDistribution !== '') {
-      this.options.push('--exclude-distribution');
-      this.options.push(ctx.excludeDistribution);
+      this.addOption('--exclude-distribution');
+      this.addOption(ctx.excludeDistribution);
     }
   }
 
   exec(): Promise<CommandResponse> {
-    for (const option of this.options) {
-      this.toolrunner.arg(option);
-    }
-    tasks.debug(`Running JReleaser with options: ${this.options.join(' ')}`);
+    this.setupToolRunnerArguments(this.toolrunner);
 
     const runnerResult = this.toolrunner.execSync();
     if (runnerResult.code === 0) {
-      return Promise.resolve(new CommandResponse(0));
+      return Promise.resolve(new CommandResponse(CommandStatus.Success, 'JReleaser assembled successfully'));
     } else {
-      return Promise.reject(new CommandResponse(1, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`));
+      return Promise.reject(
+        new CommandResponse(CommandStatus.Failed, `Failed to assemble JReleaser. Exit code: ${runnerResult.code}`),
+      );
     }
   }
 }

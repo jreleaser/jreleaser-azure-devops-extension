@@ -4,7 +4,8 @@
     "module": "commonjs",
     "types": ["node"],
     "outDir": "./dist",
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "noImplicitOverride": true
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "tests"]

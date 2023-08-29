@@ -1,34 +1,48 @@
 import { CommandResponse, ICommand } from '.';
 import { ITaskContext } from '../context';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
-import * as tasks from 'azure-pipelines-task-lib/task';
 
 export abstract class AbstractCommand implements ICommand {
-  options: string[] = [];
+  private _options: string[] = [];
+  public get options(): string[] {
+    return this._options;
+  }
+  public addOption(value: string): void {
+    this._options.push(value);
+  }
+  public setCommand(value: string): void {
+    this._options.unshift(value);
+  }
 
   constructor(protected toolrunner: toolrunner.ToolRunner) {}
 
-  private setupCommon(ctx: ITaskContext): void {
+  private setupArguments(ctx: ITaskContext): void {
     if (ctx.arguments) {
       for (const arg of ctx.arguments.split(' ')) {
-        this.options.push(arg);
+        this.addOption(arg);
       }
     }
   }
 
   public initialize(ctx: ITaskContext): void {
-    this.setupCommon(ctx);
+    this.setupArguments(ctx);
     this.setup(ctx);
   }
 
-  protected buildOptions(ctx: ITaskContext, optionMapping: { [key: string]: string }): void {
+  protected setupCommandOptions(ctx: ITaskContext, optionMapping: { [key: string]: string }): void {
     for (const key in optionMapping) {
       if (ctx[key] && ctx[key] !== '') {
-        this.options.push(optionMapping[key]);
-        this.options.push(ctx[key]);
+        this.addOption(optionMapping[key]);
+        this.addOption(ctx[key]);
       } else if (ctx[key]) {
-        this.options.push(optionMapping[key]);
+        this.addOption(optionMapping[key]);
       }
+    }
+  }
+
+  protected setupToolRunnerArguments(toolrunner: toolrunner.ToolRunner): void {
+    for (const option of this.options) {
+      toolrunner.arg(option);
     }
   }
 

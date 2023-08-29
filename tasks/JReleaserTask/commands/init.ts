@@ -1,8 +1,7 @@
-import { CommandResponse } from '.';
+import { CommandResponse, CommandStatus } from '.';
 import { ITaskContext } from '../context';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
 import { AbstractLoggingCommand } from './abstractLoggingCommand';
-import * as tasks from 'azure-pipelines-task-lib/task';
 
 export class JReleaserInit extends AbstractLoggingCommand {
   constructor(toolrunner: toolrunner.ToolRunner) {
@@ -10,27 +9,26 @@ export class JReleaserInit extends AbstractLoggingCommand {
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('init');
+    this.setCommand('init');
     if (ctx.initOverwrite) {
-      this.options.push('-o');
+      this.addOption('-o');
     }
     if (ctx.initFormat) {
-      this.options.push('-f');
-      this.options.push(ctx.initFormat);
+      this.addOption('-f');
+      this.addOption(ctx.initFormat);
     }
   }
 
   exec(): Promise<CommandResponse> {
-    for (const option of this.options) {
-      this.toolrunner.arg(option);
-    }
-    tasks.debug(`Running JReleaser with options: ${this.options.join(' ')}`);
+    this.setupToolRunnerArguments(this.toolrunner);
 
     const runnerResult = this.toolrunner.execSync();
     if (runnerResult.code === 0) {
-      return Promise.resolve(new CommandResponse(0));
+      return Promise.resolve(new CommandResponse(CommandStatus.Success, 'JReleaser initialized successfully'));
     } else {
-      return Promise.reject(new CommandResponse(1, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`));
+      return Promise.reject(
+        new CommandResponse(CommandStatus.Failed, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`),
+      );
     }
   }
 }

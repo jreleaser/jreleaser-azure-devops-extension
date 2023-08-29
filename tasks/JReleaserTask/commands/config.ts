@@ -1,6 +1,5 @@
-import { CommandResponse } from '.';
+import { CommandResponse, CommandStatus } from '.';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
-import * as tasks from 'azure-pipelines-task-lib/task';
 import { ITaskContext } from '../context';
 import { AbstractPlatformAwareModelCommand } from './abstractPlatformAwareModelCommand';
 
@@ -10,37 +9,36 @@ export class JReleaserConfig extends AbstractPlatformAwareModelCommand {
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.options.unshift('config');
+    this.setCommand('config');
     if (ctx.configFull) {
-      this.options.push('--full');
+      this.addOption('--full');
     }
     switch (ctx.configType) {
       case 'announce':
-        this.options.push('--announce');
+        this.addOption('--announce');
         break;
       case 'assembly':
-        this.options.push('--assembly');
+        this.addOption('--assembly');
         break;
       case 'changelog':
-        this.options.push('--changelog');
+        this.addOption('--changelog');
         break;
       case 'download':
-        this.options.push('--download');
+        this.addOption('--download');
         break;
     }
   }
 
   exec(): Promise<CommandResponse> {
-    for (const option of this.options) {
-      this.toolrunner.arg(option);
-    }
-    tasks.debug(`Running JReleaser with options: ${this.options.join(' ')}`);
+    this.setupToolRunnerArguments(this.toolrunner);
 
     const runnerResult = this.toolrunner.execSync();
     if (runnerResult.code === 0) {
-      return Promise.resolve(new CommandResponse(0));
+      return Promise.resolve(new CommandResponse(CommandStatus.Success, 'JReleaser config successfully'));
     } else {
-      return Promise.reject(new CommandResponse(1, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`));
+      return Promise.reject(
+        new CommandResponse(CommandStatus.Failed, `Failed to initialize JReleaser. Exit code: ${runnerResult.code}`),
+      );
     }
   }
 }
