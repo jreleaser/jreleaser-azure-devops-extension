@@ -6,23 +6,24 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "clean": "tsc --build --clean",
-    "test": "tsc --project tsconfig.test.json && mocha ./dist/tests/L0.js",
-    "test-ts": "mocha ./tests/L0InstallJReleaserLatestSuccess.ts --require ts-node/register"
+    "test": "tsc --project tsconfig.test.json && node --test ./dist/tests/L0.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.6.0",
-    "azure-pipelines-task-lib": "^4.2.0",
-    "azure-pipelines-tool-lib": "^2.0.1"
+    "axios": "^1.13.6",
+    "azure-pipelines-task-lib": "^5.2.7",
+    "azure-pipelines-tool-lib": "^2.0.10"
+  },
+  "overrides": {
+    "brace-expansion": "1.1.12",
+    "minimatch": "3.1.5",
+    "qs": "6.15.0",
+    "underscore": "1.13.8"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.5",
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^16.18.14",
-    "chai": "^4.3.7",
-    "mocha": "^10.2.0",
-    "ts-node": "^10.9.1"
+    "@types/node": "^20.19.37",
+    "typescript": "^5.9.3"
   }
 }

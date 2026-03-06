@@ -52,23 +52,28 @@ tmr.registerMock(`./utils`, {
   },
 });
 
-const mtl = require('azure-pipelines-tool-lib/tool');
-const mtlCopy = Object.assign({}, mtl);
-mtlCopy.prependPath = function (A) {
-  return new Promise(async (resolve, reject) => {
-    resolve(A);
-  });
-};
-tmr.registerMock('azure-pipelines-tool-lib/tool', mtlCopy);
+tmr.registerMock('azure-pipelines-tool-lib/tool', {
+  findLocalTool: function () {
+    return '';
+  },
+  cacheFile: function () {
+    return new Promise(async resolve => {
+      resolve(path.join(tempDir, 'cache'));
+    });
+  },
+  prependPath: function (A) {
+    return new Promise(async resolve => {
+      resolve(A);
+    });
+  },
+});
 
-const tl = require('azure-pipelines-task-lib/mock-task');
-const tlCopy = Object.assign({}, tl);
-tlCopy.tool = function (A) {
+tmr.registerMockExport('tool', function (A) {
   if (A == 'jreleaser') {
     return {
       arg: function () {},
       exec: function () {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async resolve => {
           resolve({
             code: 0,
             stdout: '1.7.0',
@@ -77,8 +82,7 @@ tlCopy.tool = function (A) {
       },
     };
   }
-};
-tmr.registerMock('azure-pipelines-task-lib/mock-task', tlCopy);
+});
 
 const a: ma.TaskLibAnswers = <ma.TaskLibAnswers>{
   stats: {
