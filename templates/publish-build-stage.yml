@@ -1,0 +1,121 @@
+stages:
+- stage: Build
+  jobs:
+  - job: Build_JReleaser_Installer
+    steps:
+    - task: Npm@1
+      displayName: 'install'
+      inputs:
+        command: install
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
+    - task: Npm@1
+      displayName: 'build'
+      inputs:
+        command: custom
+        customCommand: 'run build'
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
+    - task: Npm@1
+      displayName: 'test'
+      inputs:
+        command: custom
+        customCommand: 'run test'
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
+    - task: Npm@1
+      displayName: 'prune devDependencies'
+      inputs:
+        command: custom
+        customCommand: 'prune --omit=dev'
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
+    - task: CopyFiles@2
+      displayName: 'stage installer artifact'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller'
+        Contents: |
+          **/*
+          !**/*.ts
+          !**/tests/**
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/JReleaserInstaller'
+    - publish: '$(Build.ArtifactStagingDirectory)/JReleaserInstaller'
+      artifact: JReleaserInstaller
+
+  - job: Build_JReleaser_Task
+    steps:
+    - task: Npm@1
+      displayName: 'install'
+      inputs:
+        command: install
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
+    - task: Npm@1
+      displayName: 'build'
+      inputs:
+        command: custom
+        customCommand: 'run build'
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
+    - task: Npm@1
+      displayName: 'test'
+      inputs:
+        command: custom
+        customCommand: 'run test'
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
+    - task: Npm@1
+      displayName: 'prune devDependencies'
+      inputs:
+        command: custom
+        customCommand: 'prune --omit=dev'
+        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
+    - task: CopyFiles@2
+      displayName: 'stage task artifact'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/tasks/JReleaserTask'
+        Contents: |
+          **/*
+          !**/*.ts
+          !**/tests/**
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/JReleaserTask'
+    - publish: '$(Build.ArtifactStagingDirectory)/JReleaserTask'
+      artifact: JReleaserTask
+
+  - job: Build_JReleaser_Extension
+    dependsOn:
+    - Build_JReleaser_Installer
+    - Build_JReleaser_Task
+    steps:
+    - checkout: self
+      clean: true
+    - task: DownloadPipelineArtifact@2
+      displayName: 'download JReleaserInstaller'
+      inputs:
+        artifact: JReleaserInstaller
+        path: $(Pipeline.Workspace)/assembled/tasks/JReleaserInstaller
+    - task: DownloadPipelineArtifact@2
+      displayName: 'download JReleaserTask'
+      inputs:
+        artifact: JReleaserTask
+        path: $(Pipeline.Workspace)/assembled/tasks/JReleaserTask
+    - task: CopyFiles@2
+      displayName: 'stage extension files'
+      inputs:
+        Contents: |
+          **/*
+          !**/*.ts
+          !tasks/JReleaserInstaller/**
+          !tasks/JReleaserTask/**
+          !templates/**
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/JReleaserExtension'
+        OverWrite: true
+    - task: CopyFiles@2
+      displayName: 'copy assembled installer task'
+      inputs:
+        SourceFolder: '$(Pipeline.Workspace)/assembled/tasks/JReleaserInstaller'
+        Contents: '**/*'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/JReleaserExtension/tasks/JReleaserInstaller'
+        OverWrite: true
+    - task: CopyFiles@2
+      displayName: 'copy assembled invoker task'
+      inputs:
+        SourceFolder: '$(Pipeline.Workspace)/assembled/tasks/JReleaserTask'
+        Contents: '**/*'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/JReleaserExtension/tasks/JReleaserTask'
+        OverWrite: true
+    - publish: '$(Build.ArtifactStagingDirectory)/JReleaserExtension'
+      artifact: JReleaserExtension

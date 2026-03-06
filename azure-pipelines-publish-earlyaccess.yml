@@ -22,139 +22,14 @@ variables:
   install_account: 'https://dev.azure.com/JReleaser'
 
 stages:
-- stage: Build
-  jobs:
-  - job: Build_JReleaser_Installer
-    steps:
-    - task: Npm@1
-      displayName: 'install'
-      inputs:
-        command: 'custom'
-        customCommand: 'install --production'
-        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
-    - task: Npm@1
-      displayName: 'build'
-      inputs:
-        command: custom
-        customCommand: 'run build'
-        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
-    - task: CopyFiles@2
-      displayName: 'copy'
-      inputs:
-        SourceFolder: '$(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller/'
-        Contents: |
-          **/*
-          !**/*.ts
-          !**/tests/**
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-    - publish: '$(Build.ArtifactStagingDirectory)'
-      artifact: JReleaserInstaller
+- template: templates/publish-build-stage.yml
 
-  - job: Build_JReleaser_Task
-    steps:
-    - task: Npm@1
-      displayName: 'install'
-      inputs:
-        command: 'custom'
-        customCommand: 'install --production'
-        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
-    - task: Npm@1
-      displayName: 'build'
-      inputs:
-        command: custom
-        customCommand: 'run build'
-        workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
-    - task: CopyFiles@2
-      displayName: 'copy'
-      inputs:
-        sourceFolder: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask/
-        contents: |
-          **/*
-          !**/*.ts
-          !**/tests/**
-        targetFolder: $(Build.ArtifactStagingDirectory)
-    - publish: '$(Build.ArtifactStagingDirectory)'
-      artifact: JReleaserTask
-
-  - job: Build_JReleaser_Extension
-    dependsOn: ['Build_JReleaser_Installer', 'Build_JReleaser_Task']
-    steps:
-    - task: DownloadPipelineArtifact@2
-      displayName: 'Download JReleaserInstaller'
-      inputs:
-        artifact: JReleaserInstaller
-        path: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
-    - task: DownloadPipelineArtifact@2
-      displayName: 'Download JReleaserTask'
-      inputs:
-        artifact: JReleaserTask
-        path: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
-    - task: CopyFiles@2
-      displayName: 'copy JReleaser Extension'
-      inputs:
-        contents: |
-          **/*
-          !**/*.ts
-        targetFolder: $(Build.ArtifactStagingDirectory)
-        overWrite: true
-    - publish: '$(Build.ArtifactStagingDirectory)'
-      artifact: JReleaserExtension
-- stage: Publish_JReleaser_Extension
-  dependsOn: ['Build']
-  jobs:
-  - job: Publish_JReleaser_Extension
-    steps:
-    - checkout: self
-      fetchTags: true
-      clean: true
-    - task: CmdLine@2
-      displayName: 'get Early Access version'
-      inputs:
-        script: |
-          latest_tag=$(git tag -l --sort=-v:refname | grep -v "early-access" | head -n 1)
-          echo "##vso[task.setvariable variable=earlyaccessVer]$(echo $latest_tag | awk -F. '{$2 = $2 + 1; $3 = 0;} 1' | sed 's/ /./g')-earlyaccess"
-    - task: DownloadPipelineArtifact@2
-      displayName: 'Download JReleaserExtension'
-      inputs:
-        artifact: JReleaserExtension
-        path: $(System.DefaultWorkingDirectory)
-    - task: TfxInstaller@3
-      displayName: 'install tfx-cli'
-      inputs:
-        version: '0.14.x'
-        checkLatest: true
-    - task: UnpublishAzureDevOpsExtension@4
-      inputs:
-        connectTo: 'VsTeam'
-        connectedServiceName: 'jreleaser_publish'
-        method: 'id'
-        publisherId: 'JReleaser'
-        extensionId: '$(marketplace_extensionId)'
-    - task: PackageAzureDevOpsExtension@4
-      inputs:
-        rootFolder: '$(System.DefaultWorkingDirectory)'
-        patternManifest: 'jreleaser-azure-devops-extension.json'
-        outputPath: 'jreleaser-azure-devops-extension.vsix'
-        updateTasksVersion: false
-        extensionName: '$(marketplace_extensionName)'
-        extensionId: '$(marketplace_extensionId)'
-        extensionVersion: '$(earlyaccessVer)'
-        extensionVisibility: 'private'
-        extensionPricing: 'free'
-    - task: PublishAzureDevOpsExtension@4
-      name: publish
-      inputs:
-        connectTo: 'VsTeam'
-        connectedServiceName: 'jreleaser_publish'
-        fileType: 'vsix'
-        vsixFile: 'jreleaser-azure-devops-extension.vsix'
-        updateTasksVersion: false
-        shareWith: "$(marketplace_share_with),$(marketplace_share_with_author)"
-    - publish: 'jreleaser-azure-devops-extension.vsix'
-      artifact: JReleaserExtension-vsix
-    # wait for 1 minute to allow the extension to be installed
-    # TODO: find a better way to do this
-    - task: CmdLine@2
-      displayName: 'wait for 1 minute'
-      inputs:
-        script: 'sleep 60'
+- template: templates/publish-vsix-stage.yml
+  parameters:
+    marketplacePublisher: $(marketplace_publisher)
+    marketplaceExtensionName: $(marketplace_extensionName)
+    marketplaceExtensionId: $(marketplace_extensionId)
+    extensionVisibility: 'private'
+    shareWith: '$(marketplace_share_with),$(marketplace_share_with_author)'
+    unpublishFirst: true
+    versionStrategy: 'earlyaccess'
