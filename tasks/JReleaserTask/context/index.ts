@@ -33,7 +33,7 @@ export interface ITaskContext {
   // Template Eval Arguments
   templateEvalTargetDirectory: string;
   templateEvalOverwrite: boolean;
-  templateEvalInputType: string;
+  templateInputType: string;
   templateEvalInput: string;
   templateEvalType: string;
 }

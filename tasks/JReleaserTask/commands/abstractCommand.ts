@@ -10,8 +10,9 @@ export abstract class AbstractCommand implements ICommand {
   public addOption(value: string): void {
     this._options.push(value);
   }
-  public setCommand(value: string): void {
-    this._options.unshift(value);
+  public setCommand(value: string | string[]): void {
+    const command = Array.isArray(value) ? value : [value];
+    this._options.unshift(...command);
   }
 
   constructor(protected toolrunner: toolrunner.ToolRunner) {}

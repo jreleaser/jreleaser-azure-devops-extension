@@ -9,7 +9,7 @@ export class JReleaserTemplateEval extends AbstractPlatformAwareModelCommand {
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.setCommand('template eval');
+    this.setCommand(['template', 'eval']);
     switch (ctx.templateEvalType) {
       case 'announce':
         this.addOption('--announce');
@@ -25,7 +25,7 @@ export class JReleaserTemplateEval extends AbstractPlatformAwareModelCommand {
         break;
     }
 
-    switch (ctx.templateEvalInputType) {
+    switch (ctx.templateInputType) {
       case 'file':
         this.addOption('--input-file');
         this.addOption(ctx.templateEvalInput);
@@ -34,6 +34,11 @@ export class JReleaserTemplateEval extends AbstractPlatformAwareModelCommand {
         this.addOption('--input-directory');
         this.addOption(ctx.templateEvalInput);
         break;
+    }
+
+    if (ctx.templateEvalTargetDirectory) {
+      this.addOption('--target-directory');
+      this.addOption(ctx.templateEvalTargetDirectory);
     }
 
     if (ctx.templateEvalOverwrite) {

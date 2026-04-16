@@ -114,7 +114,7 @@
       "label": "Target directory",
       "helpMarkDown": "Directory where evaluated template(s) will be placed.",
       "visibleRule": "command = templateEval",
-      "required": false
+      "required": true
     },
     {
       "name": "templateEvalOverwrite",
@@ -144,7 +144,7 @@
       "label": "Input",
       "helpMarkDown": "Template input.",
       "visibleRule": "templateInputType = file || templateInputType = directory",
-      "required": false
+      "required": true
     },   
     {
       "name": "templateEvalType",
@@ -158,7 +158,7 @@
       },
       "helpMarkDown": "Template Eval model, if not specified, the default model is used.",
       "visibleRule": "command = templateEval",
-      "required": false
+      "required": true
     },
     {
       "name": "configFile",

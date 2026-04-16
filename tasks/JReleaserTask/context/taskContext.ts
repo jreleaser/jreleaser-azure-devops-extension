@@ -109,16 +109,12 @@ export default class TaskContext implements ITaskContext {
     return this.getBoolInput('templateEvalOverwrite');
   }
 
-  get templateEvalInputType() {
-    return this.getInput('templateEvalInputType');
+  get templateInputType() {
+    return this.getInput('templateInputType');
   }
 
   get templateEvalInput() {
     return this.getInput('templateEvalInput');
-  }
-
-  get templateEvalInputFile() {
-    return this.getInput('templateEvalInputFile');
   }
 
   get templateEvalType() {

@@ -9,7 +9,7 @@ export class JReleaserTemplateGenerate extends AbstractLoggingCommand {
   }
 
   protected setup(ctx: ITaskContext): void {
-    this.setCommand('template generate');
+    this.setCommand(['template', 'generate']);
     if (ctx.distribution && ctx.distribution !== '') {
       this.addOption('--distribution');
       this.addOption(ctx.distribution);
