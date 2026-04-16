@@ -10,6 +10,7 @@ export class Task {
   private logger: ILogger;
 
   constructor(private readonly ctx: ITaskContext, logger: ILogger) {
+    this.logger = logger;
     this.toolrunner = JReleaserToolFactory.createJReleaserTool();
     this.commands = {
       init: new commands.JReleaserInitHandler(this.toolrunner),
