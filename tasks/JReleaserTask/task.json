@@ -166,7 +166,7 @@
       "label": "Config file",
       "defaultValue": "$(System.DefaultWorkingDirectory)/jreleaser.yml",
       "helpMarkDown": "Path to the JReleaser config file. The default value is $(System.DefaultWorkingDirectory)/jreleaser.yml",
-      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate",
+      "visibleRule": "command = announce || command = assemble || command = catalog || command = changelog || command = checksum || command = config || command = deploy || command = download || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = upload",
       "groupName": "advancedArguments",
       "required": false
     },
@@ -176,7 +176,7 @@
       "label": "Strict",
       "defaultValue": "false",
       "helpMarkDown": "Enable strict mode.",
-      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate",
+      "visibleRule": "command = announce || command = assemble || command = catalog || command = changelog || command = checksum || command = config || command = deploy || command = download || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = upload",
       "groupName": "advancedArguments",
       "required": false
     },
@@ -185,7 +185,7 @@
       "type": "boolean",
       "label": "Git root search",
       "helpMarkDown": "Searches for the Git root.",
-      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate",
+      "visibleRule": "command = announce || command = assemble || command = catalog || command = changelog || command = checksum || command = config || command = deploy || command = download || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = upload",
       "defaultValue": "false",
       "groupName": "advancedArguments",
       "required": false
@@ -195,7 +195,7 @@
       "type": "string",
       "label": "set property",
       "helpMarkDown": "Sets the value of a property..",
-      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate",
+      "visibleRule": "command = announce || command = assemble || command = catalog || command = changelog || command = checksum || command = config || command = deploy || command = download || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = upload",
       "defaultValue": "false",
       "groupName": "advancedArguments",
       "required": false
@@ -206,7 +206,7 @@
       "type": "boolean",
       "label": "Select current platform",
       "helpMarkDown": "Activates paths matching the current platform.",
-      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate || command != announce || command != changelog || command != deploy || command != download ",
+      "visibleRule": "command = assemble || command = catalog || command = checksum || command = config || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = upload",
       "defaultValue": "false",
       "groupName": "advancedArguments",
       "required": false
@@ -216,7 +216,7 @@
       "type": "string",
       "label": "Select platform",
       "helpMarkDown": "Activates paths matching the given platform.",
-      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate || command != announce || command != changelog || command != deploy || command != download ",
+      "visibleRule": "command = assemble || command = catalog || command = checksum || command = config || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = upload",
       "groupName": "advancedArguments",
       "required": false
     },
@@ -225,7 +225,7 @@
       "type": "string",
       "label": "Reject platform",
       "helpMarkDown": "Activates paths not matching the given platform.",
-      "visibleRule": "command != env || command != template || command != json-schema || command != init, || command != templateGenerate || command != announce || command != changelog || command != deploy || command != download ",
+      "visibleRule": "command = assemble || command = catalog || command = checksum || command = config || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = upload",
       "groupName": "advancedArguments",
       "required": false
     },
@@ -235,7 +235,7 @@
       "type": "string",
       "label": "Distribution",
       "helpMarkDown": "Include a distribution.",
-      "visibleRule": "command = assemble || command = catalog || command = checksum ||command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = templateEval || command = upload",
+      "visibleRule": "command = assemble || command = catalog || command = checksum || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = upload",
       "groupName": "advancedArguments",
       "required": false
     },
@@ -253,7 +253,7 @@
       "type": "string",
       "label": "Exclude distribution",
       "helpMarkDown": "Exclude a distribution.",
-      "visibleRule": "command = assemble || command = catalog || command = checksum ||command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = templateEval || command = upload",
+      "visibleRule": "command = assemble || command = catalog || command = checksum || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = upload",
       "groupName": "advancedArguments",
       "required": false
     },
@@ -273,6 +273,7 @@
       "label": "Base directory",
       "defaultValue": "$(System.DefaultWorkingDirectory)",
       "helpMarkDown": "Directory containing the JReleaser config file. The default value is $(System.DefaultWorkingDirectory)",
+      "visibleRule": "command = announce || command = assemble || command = catalog || command = changelog || command = checksum || command = config || command = deploy || command = download || command = fullRelease || command = init || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = templateGenerate || command = upload",
       "groupName": "advancedArguments",
       "required": false
     },
@@ -288,7 +289,7 @@
       },
       "helpMarkDown": "Log level. Valid values are: debug, info, warn and quiet.",
       "groupName": "advancedArguments",
-      "visibleRule": "command != env || command != template || command != json-schema",
+      "visibleRule": "command = announce || command = assemble || command = catalog || command = changelog || command = checksum || command = config || command = deploy || command = download || command = fullRelease || command = init || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = templateGenerate || command = upload",
       "required": false
     },
 
