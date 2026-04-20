@@ -49,20 +49,20 @@ stages:
       inputs:
         artifact: JReleaserExtension
         path: $(System.DefaultWorkingDirectory)
-    - task: TfxInstaller@3
+    - task: TfxInstaller@5
       displayName: 'install tfx-cli'
       inputs:
         version: '0.14.x'
         checkLatest: true
     - ${{ if eq(parameters.unpublishFirst, true) }}:
-      - task: UnpublishAzureDevOpsExtension@4
+      - task: UnpublishAzureDevOpsExtension@5
         inputs:
           connectTo: 'VsTeam'
           connectedServiceName: 'jreleaser_publish'
           method: 'id'
           publisherId: '${{ parameters.marketplacePublisher }}'
           extensionId: '${{ parameters.marketplaceExtensionId }}'
-    - task: PackageAzureDevOpsExtension@4
+    - task: PackageAzureDevOpsExtension@5
       inputs:
         rootFolder: '$(System.DefaultWorkingDirectory)'
         patternManifest: 'jreleaser-azure-devops-extension.json'
@@ -73,7 +73,7 @@ stages:
         extensionVersion: '$(extensionVersion)'
         extensionVisibility: '${{ parameters.extensionVisibility }}'
         extensionPricing: 'free'
-    - task: PublishAzureDevOpsExtension@4
+    - task: PublishAzureDevOpsExtension@5
       name: publish
       inputs:
         connectTo: 'VsTeam'
