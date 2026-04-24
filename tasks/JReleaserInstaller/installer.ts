@@ -6,6 +6,7 @@ import {
   getLatestVersion,
   getJReleaserRelease,
   downloadJReleaserRelease,
+  verifyJReleaserReleaseChecksum,
   unzipJReleaserRelease,
   JReleaserRelease,
 } from './utils';
@@ -33,6 +34,7 @@ async function run() {
     console.log(`JReleaser ${version} was not found in the local cache, downloading...`);
     let downloadFile: string = await downloadJReleaserRelease(jreleaserRelease);
     console.log(`JReleaser ${version} was downloaded to ${downloadFile}`);
+    await verifyJReleaserReleaseChecksum(jreleaserRelease, downloadFile);
     toolFilePath = path.join(
       await toolLib.cacheFile(downloadFile, jreleaserRelease.name, TOOL_NAME, version),
       jreleaserRelease.name,
