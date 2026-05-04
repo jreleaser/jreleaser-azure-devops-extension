@@ -1,11 +1,14 @@
 import * as assert from 'node:assert/strict';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { describe, it } from 'node:test';
 import type { ToolRunner } from 'azure-pipelines-task-lib/toolrunner';
 import { ITaskContext } from '../context';
 import { JReleaserCustom } from '../commands/custom';
+import { JReleaserRelease } from '../commands/release';
 
-function createContext(argumentsValue: string): ITaskContext {
-  return {
+function createContext(argumentsValue: string, overrides: Partial<ITaskContext> = {}): ITaskContext {
+  return Object.assign({
     command: 'custom',
     baseDirectory: '',
     logLevel: '',
@@ -31,7 +34,7 @@ function createContext(argumentsValue: string): ITaskContext {
     templateInputType: '',
     templateEvalInput: '',
     templateEvalType: '',
-  };
+  }, overrides);
 }
 
 describe('JReleaserTask L0 Suite', () => {
@@ -61,5 +64,41 @@ describe('JReleaserTask L0 Suite', () => {
     command.initialize(createContext('--config-file "/tmp/My Project/jreleaser.yml"'));
 
     assert.deepEqual(command.options, ['--config-file', '/tmp/My Project/jreleaser.yml']);
+  });
+
+  it('does not define a false default for the properties string input', () => {
+    const taskDefinition = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'task.json'), 'utf8'));
+    const propertiesInput = taskDefinition.inputs.find((input: { name: string }) => input.name === 'properties');
+
+    assert.ok(propertiesInput);
+    assert.equal(propertiesInput.defaultValue ?? '', '');
+  });
+
+  it('does not add set-property when properties input is empty', () => {
+    const command = new JReleaserRelease({} as ToolRunner);
+
+    command.initialize(createContext('', {
+      command: 'release',
+      configFile: '/tmp/jreleaser.yml',
+      properties: '',
+    }));
+
+    assert.equal(command.options.includes('--set-property'), false);
+  });
+
+  it('adds set-property when properties input is set', () => {
+    const command = new JReleaserRelease({} as ToolRunner);
+
+    command.initialize(createContext('', {
+      command: 'release',
+      configFile: '/tmp/jreleaser.yml',
+      properties: 'project.version=1.2.3',
+    }));
+
+    assert.ok(command.options.includes('--set-property'));
+    assert.deepEqual(
+      command.options.slice(command.options.indexOf('--set-property')),
+      ['--set-property', 'project.version=1.2.3'],
+    );
   });
 });

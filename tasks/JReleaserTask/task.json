@@ -196,7 +196,6 @@
       "label": "set property",
       "helpMarkDown": "Sets the value of a property..",
       "visibleRule": "command = announce || command = assemble || command = catalog || command = changelog || command = checksum || command = config || command = deploy || command = download || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = upload",
-      "defaultValue": "false",
       "groupName": "advancedArguments",
       "required": false
     },
