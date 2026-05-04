@@ -13,14 +13,6 @@ parameters:
   type: string
   default: ''
 
-- name: releaseType
-  displayName: releaseType
-  type: string
-  values:
-  - EarlyAccess
-  - Release
-  
-
 resources:
   - repo: self
 
@@ -40,36 +32,18 @@ stages:
       inputs:
         buildType: 'specific'
         project: 'jreleaser-azure-devops-extension'
-        definition: '${{ parameters.releaseType }}'
+        definition: 'Release'
         specificBuildWithTriggering: true
         buildVersionToDownload: 'latest'
         artifactName: 'JReleaserExtension-vsix'
         targetPath: '$(System.DefaultWorkingDirectory)'
-    - ${{ if eq(parameters.releaseType, 'EarlyAccess') }}:
-      - task: CmdLine@2
-        displayName: 'Set Early Access Version'
-        inputs:
-          script: |
-            latest_tag=$(git tag -l --sort=-v:refname | grep -v "early-access" | head -n 1)
-            echo "##vso[task.setvariable variable=earlyaccessVer]$(echo $latest_tag | awk -F. '{$2 = $2 + 1; $3 = 0;} 1' | sed 's/ /./g')-earlyaccess"
     - task: JReleaserInstaller@0
       inputs:
         version: '1.5.1'
-    - ${{if eq(parameters.releaseType, 'EarlyAccess')}}:
-      - task: JReleaserInvoker@0
-        env:
-          JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
-          JRELEASER_PROJECT_VERSION: $(earlyaccessVer)
-          JRELEASER_TAG_NAME: 'early-access'
-          JRELEASER_OVERWRITE: true
-        inputs:
-          command: 'release'
-    - ${{if eq(parameters.releaseType, 'Release')}}:
-      - task: JReleaserInvoker@0
-        env:
-          JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
-          JRELEASER_PROJECT_VERSION:  ${{ parameters.version}}
-          JRELEASER_TAG_NAME: ${{ parameters.version}}
-        inputs:
-          command: 'release'
-          
+    - task: JReleaserInvoker@0
+      env:
+        JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
+        JRELEASER_PROJECT_VERSION: ${{ parameters.version }}
+        JRELEASER_TAG_NAME: ${{ parameters.version }}
+      inputs:
+        command: 'release'

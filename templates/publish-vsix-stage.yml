@@ -13,8 +13,6 @@ parameters:
 - name: unpublishFirst
   type: boolean
   default: false
-- name: versionStrategy
-  type: string
 
 stages:
 - stage: Publish_JReleaser_Extension
@@ -26,29 +24,70 @@ stages:
     - checkout: self
       fetchTags: true
       clean: true
-    - ${{ if eq(parameters.versionStrategy, 'earlyaccess') }}:
-      - task: CmdLine@2
-        displayName: 'set early access version'
-        inputs:
-          script: |
-            latest_tag=$(git tag -l --sort=-v:refname | grep -v "early-access" | head -n 1)
-            echo "##vso[task.setvariable variable=extensionVersion]$(echo $latest_tag | awk -F. '{$2 = $2 + 1; $3 = 0;} 1' | sed 's/ /./g')-earlyaccess"
-    - ${{ if eq(parameters.versionStrategy, 'tag') }}:
-      - task: CmdLine@2
-        displayName: 'set release version'
-        inputs:
-          script: |
-            if [[ "$(Build.SourceBranch)" != refs/tags/* ]]; then
-              echo "Build was not triggered by a tag, exiting."
-              exit 1
-            fi
-            version=${Build.SourceBranch#refs/tags/}
-            echo "##vso[task.setvariable variable=extensionVersion]$version"
+    - task: CmdLine@2
+      displayName: 'set release version'
+      inputs:
+        script: |
+          source_branch="$(Build.SourceBranch)"
+          if [[ "$source_branch" != refs/tags/* ]]; then
+            echo "Build was not triggered by a tag, exiting."
+            exit 1
+          fi
+          version="${source_branch#refs/tags/}"
+          echo "##vso[task.setvariable variable=extensionVersion]$version"
     - task: DownloadPipelineArtifact@2
       displayName: 'download JReleaserExtension'
       inputs:
         artifact: JReleaserExtension
         path: $(System.DefaultWorkingDirectory)
+    - task: CmdLine@2
+      displayName: 'update extension and task versions'
+      inputs:
+        script: |
+          node <<'NODE'
+          const fs = require('fs');
+
+          const extensionVersion = process.env.EXTENSION_VERSION;
+          if (!extensionVersion) {
+            throw new Error('EXTENSION_VERSION is not set');
+          }
+
+          const normalizedExtensionVersion = extensionVersion.replace(/^v/, '');
+          const taskVersionMatch = normalizedExtensionVersion.match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);
+          if (!taskVersionMatch) {
+            throw new Error(`Invalid extension version: ${extensionVersion}`);
+          }
+
+          const taskVersion = {
+            Major: taskVersionMatch[1],
+            Minor: taskVersionMatch[2],
+            Patch: taskVersionMatch[3],
+          };
+
+          function updateJson(file, updater) {
+            const json = JSON.parse(fs.readFileSync(file, 'utf8'));
+            updater(json);
+            fs.writeFileSync(file, `${JSON.stringify(json, null, 2)}\n`);
+          }
+
+          updateJson('jreleaser-azure-devops-extension.json', manifest => {
+            manifest.version = normalizedExtensionVersion;
+          });
+
+          for (const taskJson of [
+            'tasks/JReleaserInstaller/task.json',
+            'tasks/JReleaserTask/task.json',
+          ]) {
+            updateJson(taskJson, task => {
+              task.version = { ...task.version, ...taskVersion };
+            });
+          }
+
+          console.log(`Updated extension manifest to ${normalizedExtensionVersion}`);
+          console.log(`Updated task versions to ${taskVersion.Major}.${taskVersion.Minor}.${taskVersion.Patch}`);
+          NODE
+      env:
+        EXTENSION_VERSION: $(extensionVersion)
     - task: TfxInstaller@5
       displayName: 'install tfx-cli'
       inputs:

@@ -28,4 +28,3 @@ stages:
     marketplaceExtensionId: $(marketplace_extensionId)
     extensionVisibility: 'public preview'
     unpublishFirst: false
-    versionStrategy: 'tag'
