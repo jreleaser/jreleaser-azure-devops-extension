@@ -252,7 +252,7 @@
       "type": "string",
       "label": "Exclude distribution",
       "helpMarkDown": "Exclude a distribution.",
-      "visibleRule": "command = assemble || command = catalog || command = checksum || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = upload",
+      "visibleRule": "command = assemble || command = catalog || command = checksum || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = upload",
       "groupName": "advancedArguments",
       "required": false
     },
@@ -261,7 +261,7 @@
       "type": "string",
       "label": "Exclude packager",
       "helpMarkDown": "Exclude a packager.",
-      "visibleRule": "command = fullRelease || command = package || command = prepare || command = publish || command = templateGenerate",
+      "visibleRule": "command = fullRelease || command = package || command = prepare || command = publish",
       "groupName": "advancedArguments",
       "required": false
     },

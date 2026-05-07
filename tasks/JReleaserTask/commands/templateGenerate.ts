@@ -14,17 +14,9 @@ export class JReleaserTemplateGenerate extends AbstractLoggingCommand {
       this.addOption('--distribution');
       this.addOption(ctx.distribution);
     }
-    if (ctx.excludeDistribution && ctx.excludeDistribution !== '') {
-      this.addOption('--exclude-distribution');
-      this.addOption(ctx.excludeDistribution);
-    }
     if (ctx.packager && ctx.packager !== '') {
       this.addOption('--packager');
       this.addOption(ctx.packager);
-    }
-    if (ctx.excludePackager && ctx.excludePackager !== '') {
-      this.addOption('--exclude-packager');
-      this.addOption(ctx.excludePackager);
     }
   }
 

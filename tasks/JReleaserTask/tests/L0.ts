@@ -6,6 +6,7 @@ import type { ToolRunner } from 'azure-pipelines-task-lib/toolrunner';
 import { ITaskContext } from '../context';
 import { JReleaserCustom } from '../commands/custom';
 import { JReleaserRelease } from '../commands/release';
+import { JReleaserTemplateGenerate } from '../commands/templateGenerate';
 
 function createContext(argumentsValue: string, overrides: Partial<ITaskContext> = {}): ITaskContext {
   return Object.assign({
@@ -100,5 +101,35 @@ describe('JReleaserTask L0 Suite', () => {
       command.options.slice(command.options.indexOf('--set-property')),
       ['--set-property', 'project.version=1.2.3'],
     );
+  });
+
+  it('does not add unsupported exclude options to template generate', () => {
+    const command = new JReleaserTemplateGenerate({} as ToolRunner);
+
+    command.initialize(createContext('', {
+      command: 'templateGenerate',
+      distribution: 'app',
+      packager: 'brew',
+      excludeDistribution: 'oldapp',
+      excludePackager: 'scoop',
+    }));
+
+    assert.ok(command.options.includes('--distribution'));
+    assert.ok(command.options.includes('--packager'));
+    assert.equal(command.options.includes('--exclude-distribution'), false);
+    assert.equal(command.options.includes('--exclude-packager'), false);
+  });
+
+  it('does not show exclude inputs for template generate', () => {
+    const taskDefinition = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'task.json'), 'utf8'));
+    const excludeDistributionInput = taskDefinition.inputs.find(
+      (input: { name: string }) => input.name === 'excludeDistribution',
+    );
+    const excludePackagerInput = taskDefinition.inputs.find((input: { name: string }) => input.name === 'excludePackager');
+
+    assert.ok(excludeDistributionInput);
+    assert.ok(excludePackagerInput);
+    assert.equal(excludeDistributionInput.visibleRule.includes('templateGenerate'), false);
+    assert.equal(excludePackagerInput.visibleRule.includes('templateGenerate'), false);
   });
 });
