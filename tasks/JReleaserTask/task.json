@@ -161,6 +161,94 @@
       "required": true
     },
     {
+      "name": "templateGenerateType",
+      "type": "radio",
+      "label": "Template type",
+      "options": {
+        "packager": "Packager",
+        "announcer": "Announcer",
+        "assembler": "Assembler"
+      },
+      "helpMarkDown": "Template type to generate.",
+      "visibleRule": "command = templateGenerate",
+      "required": false,
+      "defaultValue": "packager"
+    },
+    {
+      "name": "templateGenerateAnnouncer",
+      "type": "string",
+      "label": "Announcer",
+      "helpMarkDown": "Announcer template name.",
+      "visibleRule": "command = templateGenerate && templateGenerateType = announcer",
+      "required": false
+    },
+    {
+      "name": "templateGenerateAssemblerType",
+      "type": "string",
+      "label": "Assembler type",
+      "helpMarkDown": "Assembler template type.",
+      "visibleRule": "command = templateGenerate && templateGenerateType = assembler",
+      "required": false
+    },
+    {
+      "name": "templateGenerateAssemblerName",
+      "type": "string",
+      "label": "Assembler name",
+      "helpMarkDown": "Assembler template name.",
+      "visibleRule": "command = templateGenerate && templateGenerateType = assembler",
+      "required": false
+    },
+    {
+      "name": "templateGenerateDistribution",
+      "type": "string",
+      "label": "Distribution",
+      "helpMarkDown": "Distribution template name.",
+      "visibleRule": "command = templateGenerate && templateGenerateType = packager",
+      "required": false
+    },
+    {
+      "name": "templateGeneratePackager",
+      "type": "string",
+      "label": "Packager",
+      "helpMarkDown": "Packager template name.",
+      "visibleRule": "command = templateGenerate && templateGenerateType = packager",
+      "required": false
+    },
+    {
+      "name": "templateGenerateDistributionType",
+      "type": "string",
+      "label": "Distribution type",
+      "helpMarkDown": "Distribution type for packager templates. Defaults to JReleaser's default when empty.",
+      "visibleRule": "command = templateGenerate && templateGenerateType = packager",
+      "required": false
+    },
+    {
+      "name": "templateGenerateOverwrite",
+      "type": "boolean",
+      "label": "Overwrite",
+      "defaultValue": "false",
+      "helpMarkDown": "Overwrite existing template files.",
+      "visibleRule": "command = templateGenerate",
+      "required": false
+    },
+    {
+      "name": "templateGenerateSnapshot",
+      "type": "boolean",
+      "label": "Snapshot",
+      "defaultValue": "false",
+      "helpMarkDown": "Use snapshot templates.",
+      "visibleRule": "command = templateGenerate",
+      "required": false
+    },
+    {
+      "name": "templateGenerateOutputDirectory",
+      "type": "filePath",
+      "label": "Output directory",
+      "helpMarkDown": "Directory where generated templates will be written.",
+      "visibleRule": "command = templateGenerate",
+      "required": false
+    },
+    {
       "name": "configFile",
       "type": "filePath",
       "label": "Config file",
@@ -234,7 +322,7 @@
       "type": "string",
       "label": "Distribution",
       "helpMarkDown": "Include a distribution.",
-      "visibleRule": "command = assemble || command = catalog || command = checksum || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = templateGenerate || command = upload",
+      "visibleRule": "command = assemble || command = catalog || command = checksum || command = fullRelease || command = package || command = prepare || command = publish || command = release || command = sign || command = upload",
       "groupName": "advancedArguments",
       "required": false
     },
@@ -243,7 +331,7 @@
       "type": "string",
       "label": "Packager",
       "helpMarkDown": "Include a packager.",
-      "visibleRule": "command = fullRelease || command = package || command = prepare || command = publish || command = templateGenerate",
+      "visibleRule": "command = fullRelease || command = package || command = prepare || command = publish",
       "groupName": "advancedArguments",
       "required": false
     },

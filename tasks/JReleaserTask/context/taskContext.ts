@@ -120,4 +120,45 @@ export default class TaskContext implements ITaskContext {
   get templateEvalType() {
     return this.getInput('templateEvalType');
   }
+
+  // Template Generate Arguments
+  get templateGenerateType() {
+    return this.getInput('templateGenerateType');
+  }
+
+  get templateGenerateAnnouncer() {
+    return this.getInput('templateGenerateAnnouncer');
+  }
+
+  get templateGenerateAssemblerType() {
+    return this.getInput('templateGenerateAssemblerType');
+  }
+
+  get templateGenerateAssemblerName() {
+    return this.getInput('templateGenerateAssemblerName');
+  }
+
+  get templateGenerateDistribution() {
+    return this.getInput('templateGenerateDistribution');
+  }
+
+  get templateGeneratePackager() {
+    return this.getInput('templateGeneratePackager');
+  }
+
+  get templateGenerateDistributionType() {
+    return this.getInput('templateGenerateDistributionType');
+  }
+
+  get templateGenerateOverwrite() {
+    return this.getBoolInput('templateGenerateOverwrite');
+  }
+
+  get templateGenerateSnapshot() {
+    return this.getBoolInput('templateGenerateSnapshot');
+  }
+
+  get templateGenerateOutputDirectory() {
+    return this.getInput('templateGenerateOutputDirectory');
+  }
 }

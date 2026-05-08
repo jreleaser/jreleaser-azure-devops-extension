@@ -36,6 +36,18 @@ export interface ITaskContext {
   templateInputType: string;
   templateEvalInput: string;
   templateEvalType: string;
+
+  // Template Generate Arguments
+  templateGenerateType: string;
+  templateGenerateAnnouncer: string;
+  templateGenerateAssemblerType: string;
+  templateGenerateAssemblerName: string;
+  templateGenerateDistribution: string;
+  templateGeneratePackager: string;
+  templateGenerateDistributionType: string;
+  templateGenerateOverwrite: boolean;
+  templateGenerateSnapshot: boolean;
+  templateGenerateOutputDirectory: string;
 }
 
 export { default as TaskContext } from './taskContext';
