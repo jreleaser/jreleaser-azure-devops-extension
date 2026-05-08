@@ -1,98 +1,173 @@
 # JReleaser Azure Pipelines Extension
 
-> This Extension still in development.  
-
 Build: ![Build Status](https://dev.azure.com/JReleaser/jreleaser-azure-devops-extension/_apis/build/status/Build)
 
 ## Overview
-The tasks in this extension allow for running JReleaser commands from Azure Pipelines.  
 
-## What is JReleaser?  
-[JReleaser](https://jreleaser.org/guide/latest/index.html) is a release automation tool. Its goal is to simplify creating releases and publishing artifacts to multiple package managers while providing customizable options.  
+This extension provides Azure Pipelines tasks for installing and running
+[JReleaser](https://jreleaser.org/guide/latest/index.html).
 
-supports any kind of project regardless of its source language (Java, Node, Rust, Perl, Python, C/C++, C#, Elixir, Haskell, etc)
+JReleaser automates releases, checksums, signatures, changelogs, package descriptors, and published artifacts for
+projects written in Java, Node, Rust, Go, Python, C/C++, C#, and other languages.
 
-## Usage  
-### Suppoted JReleaser Commands
-The following commands are supported:  
+## Prerequisites
 
-* `custom`
-* `jreleaser:env`
-* `jreleaser:init`
-* `jreleaser:config`
-* `jreleaser:template`
-* `jreleaser:template eval`
-* `jreleaser:download`
-* `jreleaser:assemble`
-* `jreleaser:changelog`
-* `jreleaser:catalog`
-* `jreleaser:checksum`
-* `jreleaser:sign`
-* `jreleaser:deploy`
-* `jreleaser:upload`
-* `jreleaser:release`
-* `jreleaser:prepare`
-* `jreleaser:package`
-* `jreleaser:announce`
-* `jreleaser:full-release`
+- A `jreleaser.yml`, `jreleaser.toml`, or `jreleaser.json` configuration file in your repository.
+- Azure Pipeline secret variables for credentials such as `JRELEASER_GITHUB_TOKEN`.
 
-### Install the JReleaser for Azure Pipelines
-Before running the JReleaser task, you can run the JReleaser Installer task to download JReleaser.
+`JReleaserInstaller@0` installs the standalone JReleaser distribution, which includes its own Java runtime.
+
+## Quick Start
+
+Start with a dry run to validate your configuration before performing remote release, upload, deploy, publish, or
+announce operations.
 
 ```yaml
-## Use the latest version of JReleaser
+steps:
 - task: JReleaserInstaller@0
   inputs:
-    version: 'latest'
+    version: '1.23.0'
 
-## Use the specific version of JReleaser
-- task: JReleaserInstaller@0
-  inputs:
-    version: '1.7.0'
-```
-
-### Run JReleaser Tasks
-The JReleaser task can be used to run any JReleaser command.  
-
-#### Run JReleaser Commands
-The following example shows how to run the `init` command.  
-
-```yaml
 - task: JReleaserInvoker@0
   inputs:
-    command: 'release'
-    customArguments: '--prerelease'
-    logLevel: 'quiet'
-```
-  
-#### Run Custom JReleaser Commands
-if you want to run a custom JReleaser command, you can use the `custom` command.  
-
-```yaml
-- task: JReleaserInvoker@0
-  inputs:
-    command: 'custom'
-    arguments: '-D=jreleaser.github.token=1234'
+    command: 'fullRelease'
+    configFile: '$(System.DefaultWorkingDirectory)/jreleaser.yml'
+    dryRun: true
     logLevel: 'info'
 ```
 
-### Example
-In the Azure pipeline project below URL, you can see the example of using the JReleaser for Azure Pipelines.  
-Example: https://dev.azure.com/jreleaser/jreleaser-azure-devops-extension-example/_build  
+## Run a Release
 
-or this repository also uses the JReleaser for Azure Pipelines in `azure-pipelines-release-github.yml`
+Remove `dryRun` after the release configuration has been validated. Pass credentials through `env`.
 
-``` yaml
-### JReleaser for Azure Pipelines Example
+```yaml
+steps:
 - task: JReleaserInstaller@0
   inputs:
-    version: '1.5.1'
+    version: '1.23.0'
 
 - task: JReleaserInvoker@0
   env:
     JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
-    JRELEASER_PROJECT_VERSION:  ${{ parameters.version}}
-    JRELEASER_TAG_NAME: ${{ parameters.version}}
+    JRELEASER_PROJECT_VERSION: $(Build.BuildNumber)
+    JRELEASER_TAG_NAME: $(JRELEASER_TAG_NAME)
   inputs:
-    command: 'release'    
+    command: 'fullRelease'
+    configFile: '$(System.DefaultWorkingDirectory)/jreleaser.yml'
+    logLevel: 'info'
 ```
+
+## Pass Secrets Safely
+
+Pass tokens and credentials through Azure Pipeline secret variables and the task `env` block. Do not put secrets in
+`arguments` or `properties`, because command-line arguments can appear in logs.
+
+```yaml
+steps:
+- task: JReleaserInvoker@0
+  env:
+    JRELEASER_GITHUB_TOKEN: $(JRELEASER_GITHUB_TOKEN)
+    JRELEASER_GPG_PASSPHRASE: $(JRELEASER_GPG_PASSPHRASE)
+  inputs:
+    command: 'release'
+    configFile: '$(System.DefaultWorkingDirectory)/jreleaser.yml'
+```
+
+## Pass Additional Arguments
+
+Use `arguments` for options that are not exposed as first-class task inputs.
+
+```yaml
+steps:
+- task: JReleaserInvoker@0
+  inputs:
+    command: 'release'
+    configFile: '$(System.DefaultWorkingDirectory)/jreleaser.yml'
+    arguments: '--settings-file "$(System.DefaultWorkingDirectory)/jreleaser.properties"'
+    logLevel: 'info'
+```
+
+For a fully custom command, include the JReleaser command name in `arguments`.
+
+```yaml
+steps:
+- task: JReleaserInvoker@0
+  inputs:
+    command: 'custom'
+    arguments: 'env --settings-file "$(System.DefaultWorkingDirectory)/jreleaser.properties"'
+```
+
+## Tasks
+
+### JReleaser Installer
+
+`JReleaserInstaller@0` downloads a JReleaser distribution from the official JReleaser GitHub releases. On a cache miss,
+it verifies the downloaded archive checksum, caches the archive in the Azure Pipelines tool cache, and adds `jreleaser`
+to `PATH`.
+
+```yaml
+steps:
+- task: JReleaserInstaller@0
+  inputs:
+    version: 'latest'
+```
+
+Pin a specific JReleaser version for repeatable builds:
+
+```yaml
+steps:
+- task: JReleaserInstaller@0
+  inputs:
+    version: '1.23.0'
+```
+
+### JReleaser Invoker
+
+`JReleaserInvoker@0` runs a JReleaser command. Use it after `JReleaserInstaller@0` or after another step has made
+`jreleaser` available on `PATH`.
+
+Common inputs:
+
+| Input | Description |
+| --- | --- |
+| `command` | JReleaser command to run. |
+| `configFile` | Path to the JReleaser configuration file. |
+| `dryRun` | Skip remote operations for supported commands. |
+| `arguments` | Extra command-line arguments passed to JReleaser. |
+| `logLevel` | One of `debug`, `info`, `warn`, or `quiet`. |
+
+## Supported Commands
+
+Use these values in the `command` input.
+
+| Input value | JReleaser command |
+| --- | --- |
+| `announce` | `jreleaser announce` |
+| `assemble` | `jreleaser assemble` |
+| `catalog` | `jreleaser catalog` |
+| `changelog` | `jreleaser changelog` |
+| `checksum` | `jreleaser checksum` |
+| `config` | `jreleaser config` |
+| `custom` | Arguments are passed directly to `jreleaser` |
+| `deploy` | `jreleaser deploy` |
+| `download` | `jreleaser download` |
+| `env` | `jreleaser env` |
+| `fullRelease` | `jreleaser full-release` |
+| `init` | `jreleaser init` |
+| `jsonSchema` | `jreleaser json-schema` |
+| `package` | `jreleaser package` |
+| `prepare` | `jreleaser prepare` |
+| `publish` | `jreleaser publish` |
+| `release` | `jreleaser release` |
+| `sign` | `jreleaser sign` |
+| `templateEval` | `jreleaser template eval` |
+| `templateGenerate` | `jreleaser template generate` |
+| `upload` | `jreleaser upload` |
+
+## Roadmap
+
+Possible future improvements:
+
+- Additional common CLI inputs such as `settingsFile`, `outputDirectory`, `reproducible`, and `yolo`.
+- Export `out/jreleaser/output.properties` as Azure Pipelines output variables.
+- A single task that installs and runs JReleaser in one step.
