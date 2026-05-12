@@ -5,7 +5,8 @@ import * as crypto from 'crypto';
 import * as assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import * as ttm from 'azure-pipelines-task-lib/mock-test';
-import { getJReleaserRelease, verifyJReleaserReleaseChecksum } from '../utils';
+import * as toolLib from 'azure-pipelines-tool-lib/tool';
+import { downloadJReleaserRelease, getJReleaserRelease, verifyJReleaserReleaseChecksum } from '../utils';
 
 function createTempFile(contents: string): string {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'jreleaser-installer-'));
@@ -19,6 +20,37 @@ function sha256(contents: string): string {
 }
 
 describe('JReleaserInstaller utility suite', () => {
+  it('downloads release without reusing the archive name as the temp file name', async () => {
+    const originalDownloadTool = toolLib.downloadTool;
+    const calls: unknown[][] = [];
+
+    Object.defineProperty(toolLib, 'downloadTool', {
+      value: async (...args: unknown[]) => {
+        calls.push(args);
+        return '/agent/_temp/generated-download-id';
+      },
+      configurable: true,
+    });
+
+    try {
+      const downloadPath = await downloadJReleaserRelease({
+        version: '1.23.0',
+        platform: 'linux-x86_64',
+        name: 'jreleaser-standalone-1.23.0-linux-x86_64',
+        releaseUrl: 'https://example.test/archive',
+        checksumUrl: 'https://example.test/checksum',
+      });
+
+      assert.equal(downloadPath, '/agent/_temp/generated-download-id');
+      assert.deepEqual(calls, [['https://example.test/archive']]);
+    } finally {
+      Object.defineProperty(toolLib, 'downloadTool', {
+        value: originalDownloadTool,
+        configurable: true,
+      });
+    }
+  });
+
   it('selects the exact release archive asset and ignores the signature asset', async () => {
     const release = await getJReleaserRelease('1.23.0', true, 'linux-x86_64', [
       {

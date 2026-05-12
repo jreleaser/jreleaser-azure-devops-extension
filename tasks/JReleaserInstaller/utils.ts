@@ -121,7 +121,7 @@ export async function getJReleaserRelease(
 
 export async function downloadJReleaserRelease(release: JReleaserRelease): Promise<string> {
   try {
-    let downloadPath = await toolLib.downloadTool(release.releaseUrl, release.name);
+    let downloadPath = await toolLib.downloadTool(release.releaseUrl);
     tl.debug(`Downloaded JReleaser release: ${downloadPath}`);
     return downloadPath;
   } catch (error) {
