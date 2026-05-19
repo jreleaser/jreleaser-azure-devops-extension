@@ -6,7 +6,7 @@
   "author": "JReleaser",
   "helpMarkDown": "Installs JReleaser for JReleaser integration tasks.",
   "category": "Tool",
-  "minimumAgentVersion": "2.144.0",
+  "minimumAgentVersion": "2.206.1",
   "version": {
     "Major": "0",
     "Minor": "3",
@@ -32,6 +32,14 @@
     }
   ],
   "execution": {
+    "Node24": {
+      "target": "./dist/installer.js",
+      "argumentFormat": ""
+    },
+    "Node20_1": {
+      "target": "./dist/installer.js",
+      "argumentFormat": ""
+    },
     "Node16": {
       "target": "./dist/installer.js",
       "argumentFormat": ""

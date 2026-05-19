@@ -4,7 +4,7 @@
   "friendlyName": "JReleaser Invoker",
   "description": "Invoke JReleaser commands",
   "author": "JReleaser",
-  "minimumAgentVersion": "2.144.0",
+  "minimumAgentVersion": "2.206.1",
   "helpMarkDown": "",
   "category": "Tool",
   "version": {
@@ -392,6 +392,14 @@
     }
   ],
   "execution": {
+    "Node24": {
+      "target": "./dist/jreleaserTask.js",
+      "argumentFormat": ""
+    },
+    "Node20_1": {
+      "target": "./dist/jreleaserTask.js",
+      "argumentFormat": ""
+    },
     "Node16": {
       "target": "./dist/jreleaserTask.js",
       "argumentFormat": ""
