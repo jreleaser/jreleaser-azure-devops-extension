@@ -34,6 +34,7 @@ stages:
             exit 1
           fi
           version="${source_branch#refs/tags/}"
+          version="${version#v}"
           echo "##vso[task.setvariable variable=extensionVersion]$version"
     - task: DownloadPipelineArtifact@2
       displayName: 'download JReleaserExtension'
@@ -44,48 +45,7 @@ stages:
       displayName: 'update extension and task versions'
       inputs:
         script: |
-          node <<'NODE'
-          const fs = require('fs');
-
-          const extensionVersion = process.env.EXTENSION_VERSION;
-          if (!extensionVersion) {
-            throw new Error('EXTENSION_VERSION is not set');
-          }
-
-          const normalizedExtensionVersion = extensionVersion.replace(/^v/, '');
-          const taskVersionMatch = normalizedExtensionVersion.match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);
-          if (!taskVersionMatch) {
-            throw new Error(`Invalid extension version: ${extensionVersion}`);
-          }
-
-          const taskVersion = {
-            Major: taskVersionMatch[1],
-            Minor: taskVersionMatch[2],
-            Patch: taskVersionMatch[3],
-          };
-
-          function updateJson(file, updater) {
-            const json = JSON.parse(fs.readFileSync(file, 'utf8'));
-            updater(json);
-            fs.writeFileSync(file, `${JSON.stringify(json, null, 2)}\n`);
-          }
-
-          updateJson('jreleaser-azure-devops-extension.json', manifest => {
-            manifest.version = normalizedExtensionVersion;
-          });
-
-          for (const taskJson of [
-            'tasks/JReleaserInstaller/task.json',
-            'tasks/JReleaserTask/task.json',
-          ]) {
-            updateJson(taskJson, task => {
-              task.version = { ...task.version, ...taskVersion };
-            });
-          }
-
-          console.log(`Updated extension manifest to ${normalizedExtensionVersion}`);
-          console.log(`Updated task versions to ${taskVersion.Major}.${taskVersion.Minor}.${taskVersion.Patch}`);
-          NODE
+          node scripts/set-release-version.cjs "$EXTENSION_VERSION"
       env:
         EXTENSION_VERSION: $(extensionVersion)
     - task: TfxInstaller@5
