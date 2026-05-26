@@ -5,7 +5,7 @@
   "version": "0.3.1",
   "name": "JReleaser",
   "description": "Task to install and run JReleaser with Azure Pipelines",
-  "public": false,
+  "public": true,
   "categories": ["Azure Pipelines"],
   "tags": [
     "JReleaser",
