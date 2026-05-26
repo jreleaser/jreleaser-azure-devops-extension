@@ -6,7 +6,7 @@ export default class TaskContext implements ITaskContext {
   private getBoolInput: (name: string, required?: boolean | undefined) => boolean;
 
   public getVariable: (name: string) => string | undefined;
-  public setVariable: (name: string, val: string, secret?: boolean | undefined) => void;
+  public setVariable: (name: string, val: string, secret?: boolean | undefined, isOutput?: boolean | undefined) => void;
 
   constructor() {
     this.getInput = <(name: string, required?: boolean | undefined) => string>tasks.getInput;
@@ -46,6 +46,10 @@ export default class TaskContext implements ITaskContext {
 
   get dryRun() {
     return this.getBoolInput('dryRun');
+  }
+
+  get exportOutputProperties() {
+    return this.getBoolInput('exportOutputProperties');
   }
 
   // AbstractPlatformAwareModelCommand

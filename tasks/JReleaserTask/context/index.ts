@@ -4,6 +4,8 @@ export interface ITaskContext {
   logLevel: string;
   arguments: string;
   dryRun: boolean;
+  exportOutputProperties: boolean;
+  setVariable: (name: string, val: string, secret?: boolean, isOutput?: boolean) => void;
 
   // AbstractModelCommand
   configFile: String;

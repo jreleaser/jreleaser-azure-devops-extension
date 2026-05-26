@@ -6,16 +6,18 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "clean": "tsc --build --clean",
-    "test": "tsc --project tsconfig.test.json && node --test ./dist/tests/L0.js"
+    "test": "tsc --project tsconfig.test.json && node --test ./dist/tests/index.js"
   },
   "dependencies": {
-    "azure-pipelines-task-lib": "^5.2.7"
+    "azure-pipelines-task-lib": "^5.2.7",
+    "properties-reader": "^2.3.0"
   },
   "overrides": {
     "brace-expansion": "1.1.12"
   },
   "devDependencies": {
     "@types/node": "^20.19.37",
+    "@types/properties-reader": "^2.1.3",
     "typescript": "^5.9.3"
   },
   "keywords": [],

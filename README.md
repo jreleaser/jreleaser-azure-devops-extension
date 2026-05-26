@@ -97,6 +97,52 @@ steps:
     arguments: 'env --settings-file "$(System.DefaultWorkingDirectory)/jreleaser.properties"'
 ```
 
+## Use Output Properties
+
+Enable `exportOutputProperties` to export values from `out/jreleaser/output.properties` as Azure Pipelines output
+variables after a successful command. Property keys are normalized and prefixed with `JRELEASER_`, for example
+`project.version` becomes `JRELEASER_PROJECT_VERSION`.
+
+The task logs exported variable names only. Azure Pipelines output variables are still set through the standard
+`task.setvariable` command, so the variable value is passed to Azure Pipelines as part of that command. Do not use this
+for sensitive values; keys that look secret-like are skipped automatically.
+
+`exportOutputProperties` is not supported with the `custom` command because custom arguments can choose a different base
+directory. The task logs a warning and skips export in that case.
+
+```yaml
+steps:
+- task: JReleaserInvoker@0
+  name: jreleaser
+  inputs:
+    command: 'fullRelease'
+    configFile: '$(System.DefaultWorkingDirectory)/jreleaser.yml'
+    exportOutputProperties: true
+
+- script: echo "$(jreleaser.JRELEASER_PROJECT_VERSION)"
+```
+
+For a downstream job, map the output through `dependencies`:
+
+```yaml
+jobs:
+- job: release
+  steps:
+  - task: JReleaserInvoker@0
+    name: jreleaser
+    inputs:
+      command: 'fullRelease'
+      configFile: '$(System.DefaultWorkingDirectory)/jreleaser.yml'
+      exportOutputProperties: true
+
+- job: notify
+  dependsOn: release
+  variables:
+    jreleaserVersion: $[ dependencies.release.outputs['jreleaser.JRELEASER_PROJECT_VERSION'] ]
+  steps:
+  - script: echo "$(jreleaserVersion)"
+```
+
 ## Tasks
 
 ### JReleaser Installer
@@ -133,6 +179,7 @@ Common inputs:
 | `command` | JReleaser command to run. |
 | `configFile` | Path to the JReleaser configuration file. |
 | `dryRun` | Skip remote operations for supported commands. |
+| `exportOutputProperties` | Export `out/jreleaser/output.properties` as Azure Pipelines output variables. |
 | `arguments` | Extra command-line arguments passed to JReleaser. |
 | `logLevel` | One of `debug`, `info`, `warn`, or `quiet`. |
 
@@ -169,5 +216,4 @@ Use these values in the `command` input.
 Possible future improvements:
 
 - Additional common CLI inputs such as `settingsFile`, `outputDirectory`, `reproducible`, and `yolo`.
-- Export `out/jreleaser/output.properties` as Azure Pipelines output variables.
 - A single task that installs and runs JReleaser in one step.

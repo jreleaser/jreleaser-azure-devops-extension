@@ -3,6 +3,7 @@ import { ITaskContext } from './context';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
 import * as tasks from 'azure-pipelines-task-lib/task';
 import { ILogger } from './logger';
+import { exportOutputPropertiesIfSuccessful } from './outputProperties';
 
 export class Task {
   private readonly commands: { [name: string]: commands.ICommand };
@@ -49,6 +50,7 @@ export class Task {
       command.initialize(this.ctx);
       this.logger.debug(`Executing options: ${command.options.join(' ')}`);
       response = await command.exec();
+      exportOutputPropertiesIfSuccessful(response, this.ctx, this.logger);
     } catch (error) {
       response = new commands.CommandResponse(commands.CommandStatus.Failed, error.message);
       this.logger.error(error.message);

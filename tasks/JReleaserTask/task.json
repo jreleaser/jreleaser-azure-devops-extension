@@ -389,6 +389,15 @@
       "groupName": "advancedArguments",
       "required": false,
       "visibleRule": "command = announce || command = changelog || command = deploy || command = download || command = fullRelease || command = package || command = publish || command = release || command = upload"
+    },
+    {
+      "name": "exportOutputProperties",
+      "type": "boolean",
+      "label": "Export output properties",
+      "defaultValue": "false",
+      "helpMarkDown": "Export values from out/jreleaser/output.properties as Azure Pipelines output variables after a successful command. Not supported for custom command.",
+      "groupName": "advancedArguments",
+      "required": false
     }
   ],
   "execution": {

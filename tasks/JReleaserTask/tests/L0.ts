@@ -15,6 +15,8 @@ function createContext(argumentsValue: string, overrides: Partial<ITaskContext> 
     logLevel: '',
     arguments: argumentsValue,
     dryRun: false,
+    exportOutputProperties: false,
+    setVariable: () => {},
     configFile: '',
     strict: false,
     gitRootSearch: false,
