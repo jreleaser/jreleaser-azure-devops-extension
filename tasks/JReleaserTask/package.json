@@ -13,7 +13,7 @@
     "properties-reader": "^2.3.0"
   },
   "overrides": {
-    "brace-expansion": "1.1.12"
+    "brace-expansion": "1.1.13"
   },
   "devDependencies": {
     "@types/node": "^20.19.37",
