@@ -25,18 +25,23 @@ async function run() {
   console.log(`Release URL: ${jreleaserRelease.releaseUrl}`);
   console.log(`Checksum URL: ${jreleaserRelease.checksumUrl}`);
 
-  let toolPath: string = toolLib.findLocalTool(TOOL_NAME, version);
-  let toolFilePath: string;
-  if (toolPath) {
+  const cacheArch = jreleaserRelease.platform;
+  let toolPath: string = toolLib.findLocalTool(TOOL_NAME, version, cacheArch);
+  let toolFilePath: string | undefined;
+  if (toolPath && tl.exist(path.join(toolPath, jreleaserRelease.name))) {
     console.log(`JReleaser ${version} was found in the local cache`);
     toolFilePath = path.join(toolPath, jreleaserRelease.name);
-  } else {
+  } else if (toolPath) {
+    console.log(`Ignoring incomplete JReleaser ${version} cache for ${cacheArch}`);
+  }
+
+  if (!toolFilePath) {
     console.log(`JReleaser ${version} was not found in the local cache, downloading...`);
     let downloadFile: string = await downloadJReleaserRelease(jreleaserRelease);
     console.log(`JReleaser ${version} was downloaded to ${downloadFile}`);
     await verifyJReleaserReleaseChecksum(jreleaserRelease, downloadFile);
     toolFilePath = path.join(
-      await toolLib.cacheFile(downloadFile, jreleaserRelease.name, TOOL_NAME, version),
+      await toolLib.cacheFile(downloadFile, jreleaserRelease.name, TOOL_NAME, version, cacheArch),
       jreleaserRelease.name,
     );
   }

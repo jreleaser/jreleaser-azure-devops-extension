@@ -13,8 +13,18 @@ export type Platform =
   | 'osx-x86_64'
   | 'linux-aarch64'
   | 'linux-x86_64'
+  | 'linux_musl-aarch64'
+  | 'linux_musl-x86_64'
   | 'windows-aarch64'
   | 'windows-x86_64';
+
+type NodeDiagnosticReport = {
+  header?: {
+    glibcVersionRuntime?: string;
+  };
+};
+
+type GetNodeDiagnosticReport = () => NodeDiagnosticReport | undefined;
 
 export interface JReleaserRelease {
   readonly version: string;
@@ -29,17 +39,33 @@ export interface JReleaserReleaseAsset {
   readonly browser_download_url: string;
 }
 
-export function resolvePlatform(): Platform {
-  const platform: string = os.platform();
-  const arch: string = os.arch();
+export function isMuslLinux(
+  arch: string = os.arch(),
+  existsSync: (path: fs.PathLike) => boolean = fs.existsSync,
+  getReport: GetNodeDiagnosticReport = () => process.report?.getReport?.() as NodeDiagnosticReport | undefined,
+): boolean {
+  const report = getReport();
+  if (report?.header?.glibcVersionRuntime) {
+    return false;
+  }
+
+  if (arch === 'x64') {
+    return existsSync('/lib/ld-musl-x86_64.so.1');
+  } else if (arch === 'arm64') {
+    return existsSync('/lib/ld-musl-aarch64.so.1');
+  }
+  return false;
+}
+
+export function resolvePlatform(platform: string = os.platform(), arch: string = os.arch(), linuxMusl?: boolean): Platform {
   if (platform === 'darwin' && arch === 'x64') {
     return 'osx-x86_64';
   } else if (platform === 'darwin' && arch === 'arm64') {
     return 'osx-aarch64';
   } else if (platform === 'linux' && arch === 'x64') {
-    return 'linux-x86_64';
+    return (linuxMusl ?? isMuslLinux(arch)) ? 'linux_musl-x86_64' : 'linux-x86_64';
   } else if (platform === 'linux' && arch === 'arm64') {
-    return 'linux-aarch64';
+    return (linuxMusl ?? isMuslLinux(arch)) ? 'linux_musl-aarch64' : 'linux-aarch64';
   } else if (platform === 'win32' && arch === 'x64') {
     return 'windows-x86_64';
   } else if (platform === 'win32' && arch === 'arm64') {

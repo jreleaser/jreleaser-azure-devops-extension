@@ -6,7 +6,13 @@ import * as assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import * as ttm from 'azure-pipelines-task-lib/mock-test';
 import * as toolLib from 'azure-pipelines-tool-lib/tool';
-import { downloadJReleaserRelease, getJReleaserRelease, verifyJReleaserReleaseChecksum } from '../utils';
+import {
+  downloadJReleaserRelease,
+  getJReleaserRelease,
+  isMuslLinux,
+  resolvePlatform,
+  verifyJReleaserReleaseChecksum,
+} from '../utils';
 
 function createTempFile(contents: string): string {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'jreleaser-installer-'));
@@ -20,6 +26,52 @@ function sha256(contents: string): string {
 }
 
 describe('JReleaserInstaller utility suite', () => {
+  it('detects musl only when glibc is not reported and the musl loader exists for the current arch', () => {
+    const existsSync = (filePath: fs.PathLike): boolean => filePath === '/lib/ld-musl-x86_64.so.1';
+
+    assert.equal(isMuslLinux('x64', existsSync, () => ({ header: {} })), true);
+  });
+
+  it('does not detect musl when Node reports glibc', () => {
+    const existsSync = (filePath: fs.PathLike): boolean => filePath === '/lib/ld-musl-x86_64.so.1';
+
+    assert.equal(isMuslLinux('x64', existsSync, () => ({ header: { glibcVersionRuntime: '2.35' } })), false);
+  });
+
+  it('does not detect musl when the musl loader is absent', () => {
+    assert.equal(isMuslLinux('x64', () => false, () => ({ header: {} })), false);
+  });
+
+  it('selects musl Linux archives when the Linux agent uses musl libc', () => {
+    assert.equal(resolvePlatform('linux', 'x64', true), 'linux_musl-x86_64');
+    assert.equal(resolvePlatform('linux', 'arm64', true), 'linux_musl-aarch64');
+  });
+
+  it('keeps selecting glibc Linux archives when the Linux agent does not use musl libc', () => {
+    assert.equal(resolvePlatform('linux', 'x64', false), 'linux-x86_64');
+    assert.equal(resolvePlatform('linux', 'arm64', false), 'linux-aarch64');
+  });
+
+  it('selects the exact musl release archive asset', async () => {
+    const release = await getJReleaserRelease('1.24.0', true, 'linux_musl-x86_64', [
+      {
+        name: 'jreleaser-standalone-1.24.0-linux-x86_64.zip',
+        browser_download_url: 'https://example.test/glibc-archive',
+      },
+      {
+        name: 'jreleaser-standalone-1.24.0-linux_musl-x86_64.zip',
+        browser_download_url: 'https://example.test/musl-archive',
+      },
+      {
+        name: 'checksums_sha256.txt',
+        browser_download_url: 'https://example.test/checksum',
+      },
+    ]);
+
+    assert.equal(release.name, 'jreleaser-standalone-1.24.0-linux_musl-x86_64');
+    assert.equal(release.releaseUrl, 'https://example.test/musl-archive');
+  });
+
   it('downloads release without reusing the archive name as the temp file name', async () => {
     const originalDownloadTool = toolLib.downloadTool;
     const calls: unknown[][] = [];
