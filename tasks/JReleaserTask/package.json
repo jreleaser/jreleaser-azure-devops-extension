@@ -9,7 +9,7 @@
     "test": "tsc --project tsconfig.test.json && node --test ./dist/tests/index.js"
   },
   "dependencies": {
-    "azure-pipelines-task-lib": "^5.2.7",
+    "azure-pipelines-task-lib": "^5.278.0",
     "properties-reader": "^2.3.0"
   },
   "overrides": {
