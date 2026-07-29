@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
+import { execFileSync } from 'node:child_process';
 import * as assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import * as ttm from 'azure-pipelines-task-lib/mock-test';
@@ -26,20 +27,47 @@ function sha256(contents: string): string {
 }
 
 describe('JReleaserInstaller utility suite', () => {
+  it('reads task input after loading tool-lib', () => {
+    execFileSync(
+      process.execPath,
+      [
+        '-e',
+        "require('azure-pipelines-tool-lib/tool'); require('azure-pipelines-task-lib/task').getInput('version', true);",
+      ],
+      {
+        cwd: path.resolve(__dirname, '..', '..'),
+        env: { ...process.env, INPUT_VERSION: '1.25.0' },
+      },
+    );
+  });
+
   it('detects musl only when glibc is not reported and the musl loader exists for the current arch', () => {
     const existsSync = (filePath: fs.PathLike): boolean => filePath === '/lib/ld-musl-x86_64.so.1';
 
-    assert.equal(isMuslLinux('x64', existsSync, () => ({ header: {} })), true);
+    assert.equal(
+      isMuslLinux('x64', existsSync, () => ({ header: {} })),
+      true,
+    );
   });
 
   it('does not detect musl when Node reports glibc', () => {
     const existsSync = (filePath: fs.PathLike): boolean => filePath === '/lib/ld-musl-x86_64.so.1';
 
-    assert.equal(isMuslLinux('x64', existsSync, () => ({ header: { glibcVersionRuntime: '2.35' } })), false);
+    assert.equal(
+      isMuslLinux('x64', existsSync, () => ({ header: { glibcVersionRuntime: '2.35' } })),
+      false,
+    );
   });
 
   it('does not detect musl when the musl loader is absent', () => {
-    assert.equal(isMuslLinux('x64', () => false, () => ({ header: {} })), false);
+    assert.equal(
+      isMuslLinux(
+        'x64',
+        () => false,
+        () => ({ header: {} }),
+      ),
+      false,
+    );
   });
 
   it('selects musl Linux archives when the Linux agent uses musl libc', () => {
