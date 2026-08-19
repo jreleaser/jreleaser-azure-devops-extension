@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import PropertiesReader = require('properties-reader');
 import { CommandResponse, CommandStatus } from './commands';
 import { ITaskContext } from './context';
+import { getOutputPropertiesBaseDirectory } from './baseDirectory';
 import { ILogger } from './logger';
 
 const OUTPUT_PROPERTIES_PATH = path.join('out', 'jreleaser', 'output.properties');
@@ -11,7 +12,12 @@ const DEFAULT_OUTPUT_VARIABLE_PREFIX = 'JRELEASER_';
 
 type OutputPropertiesContext = Pick<
   ITaskContext,
-  'command' | 'baseDirectory' | 'exportOutputProperties' | 'setVariable'
+  | 'command'
+  | 'arguments'
+  | 'baseDirectory'
+  | 'configFile'
+  | 'exportOutputProperties'
+  | 'setVariable'
 >;
 
 export function exportOutputPropertiesIfSuccessful(
@@ -36,7 +42,7 @@ export function exportOutputProperties(ctx: OutputPropertiesContext, logger: ILo
     return;
   }
 
-  const outputPropertiesPath = path.resolve(ctx.baseDirectory || process.cwd(), OUTPUT_PROPERTIES_PATH);
+  const outputPropertiesPath = path.resolve(getOutputPropertiesBaseDirectory(ctx), OUTPUT_PROPERTIES_PATH);
   if (!fs.existsSync(outputPropertiesPath)) {
     logger.warning(`JReleaser output properties file was not found: ${outputPropertiesPath}`);
     return;

@@ -2,7 +2,7 @@ import { CommandResponse, ICommand } from '.';
 import { ITaskContext } from '../context';
 import * as toolrunner from 'azure-pipelines-task-lib/toolrunner';
 
-function parseArgumentLine(argString: string): string[] {
+export function parseArgumentLine(argString: string): string[] {
   const args: string[] = [];
   let inQuotes = false;
   let escaped = false;

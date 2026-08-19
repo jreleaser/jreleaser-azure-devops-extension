@@ -59,7 +59,7 @@
       "name": "arguments",
       "type": "string",
       "label": "Arguments",
-      "helpMarkDown": "The custom JReleaser command to execute.",
+      "helpMarkDown": "Additional JReleaser arguments. If --basedir or -b is supplied here, it takes precedence over Base directory.",
       "required": false
     },
     {
@@ -358,8 +358,8 @@
       "name": "baseDirectory",
       "type": "filePath",
       "label": "Base directory",
-      "defaultValue": "$(System.DefaultWorkingDirectory)",
-      "helpMarkDown": "Directory containing the JReleaser config file. The default value is $(System.DefaultWorkingDirectory)",
+      "defaultValue": "",
+      "helpMarkDown": "Directory containing the JReleaser config file. Leave empty to infer the base directory from the config file or current working directory.",
       "visibleRule": "command = announce || command = assemble || command = catalog || command = changelog || command = checksum || command = config || command = deploy || command = download || command = fullRelease || command = init || command = package || command = prepare || command = publish || command = release || command = sign || command = templateEval || command = templateGenerate || command = upload",
       "groupName": "advancedArguments",
       "required": false

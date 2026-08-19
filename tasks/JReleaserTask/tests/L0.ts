@@ -7,6 +7,7 @@ import { ITaskContext } from '../context';
 import { JReleaserCustom } from '../commands/custom';
 import { JReleaserRelease } from '../commands/release';
 import { JReleaserTemplateGenerate } from '../commands/templateGenerate';
+import { getOutputPropertiesBaseDirectory } from '../baseDirectory';
 
 function createContext(argumentsValue: string, overrides: Partial<ITaskContext> = {}): ITaskContext {
   return Object.assign({
@@ -85,6 +86,65 @@ describe('JReleaserTask L0 Suite', () => {
 
     assert.ok(propertiesInput);
     assert.equal(propertiesInput.defaultValue ?? '', '');
+  });
+
+  it('does not define a default base directory so an empty input means auto basedir', () => {
+    const taskDefinition = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'task.json'), 'utf8'));
+    const baseDirectoryInput = taskDefinition.inputs.find((input: { name: string }) => input.name === 'baseDirectory');
+
+    assert.ok(baseDirectoryInput);
+    assert.equal(baseDirectoryInput.defaultValue ?? '', '');
+  });
+
+  it('resolves output properties basedir with JReleaser precedence', () => {
+    const previousBaseDirectory = process.env['JRELEASER_BASEDIR'];
+    const argumentBaseDirectory = path.resolve('argument-project');
+    const inputBaseDirectory = path.resolve('input-project');
+    const environmentBaseDirectory = path.resolve('environment-project');
+    const configBaseDirectory = path.resolve('config-project');
+
+    try {
+      process.env['JRELEASER_BASEDIR'] = environmentBaseDirectory;
+
+      assert.equal(
+        getOutputPropertiesBaseDirectory(createContext(`--basedir "${argumentBaseDirectory}"`, {
+          command: 'release',
+          baseDirectory: inputBaseDirectory,
+          configFile: path.join(configBaseDirectory, 'jreleaser.yml'),
+        })),
+        argumentBaseDirectory,
+      );
+      assert.equal(
+        getOutputPropertiesBaseDirectory(createContext('', {
+          command: 'release',
+          baseDirectory: inputBaseDirectory,
+          configFile: path.join(configBaseDirectory, 'jreleaser.yml'),
+        })),
+        inputBaseDirectory,
+      );
+      assert.equal(
+        getOutputPropertiesBaseDirectory(createContext('', {
+          command: 'release',
+          configFile: path.join(configBaseDirectory, 'jreleaser.yml'),
+        })),
+        environmentBaseDirectory,
+      );
+
+      delete process.env['JRELEASER_BASEDIR'];
+      assert.equal(
+        getOutputPropertiesBaseDirectory(createContext('', {
+          command: 'release',
+          configFile: path.join(configBaseDirectory, 'jreleaser.yml'),
+        })),
+        configBaseDirectory,
+      );
+    } finally {
+      if (previousBaseDirectory === undefined) {
+        delete process.env['JRELEASER_BASEDIR'];
+      } else {
+        process.env['JRELEASER_BASEDIR'] = previousBaseDirectory;
+      }
+    }
   });
 
   it('does not add set-property when properties input is empty', () => {
