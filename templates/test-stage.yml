@@ -1,0 +1,49 @@
+stages:
+- stage: Test
+  dependsOn: Build
+  jobs:
+  - job: Smoke_Package
+    strategy:
+      matrix:
+        Linux_Node16:
+          image: ubuntu-24.04
+          nodeVersion: '16'
+        Linux_Node20:
+          image: ubuntu-24.04
+          nodeVersion: '20'
+        Linux_Node24:
+          image: ubuntu-24.04
+          nodeVersion: '24'
+        Windows_Node16:
+          image: windows-2022
+          nodeVersion: '16'
+        Windows_Node20:
+          image: windows-2022
+          nodeVersion: '20'
+        Windows_Node24:
+          image: windows-2022
+          nodeVersion: '24'
+    pool:
+      vmImage: $(image)
+    steps:
+    - checkout: self
+      clean: true
+    - task: UseNode@1
+      inputs:
+        version: '$(nodeVersion).x'
+    - task: DownloadPipelineArtifact@2
+      displayName: 'download the built VSIX'
+      inputs:
+        artifact: JReleaserExtension-vsix
+        path: $(Pipeline.Workspace)/JReleaserExtension-vsix
+    - task: ExtractFiles@1
+      displayName: 'unpack the VSIX'
+      inputs:
+        archiveFilePatterns: '$(Pipeline.Workspace)/JReleaserExtension-vsix/jreleaser-azure-devops-extension.vsix'
+        destinationFolder: '$(Agent.TempDirectory)/jreleaser-extension'
+    - script: node scripts/smoke-test-package.cjs "$(Agent.TempDirectory)/jreleaser-extension" "$(Build.ArtifactStagingDirectory)/smoke" 1.26.0
+      displayName: 'verify packaged Installer and Invoker'
+    - publish: '$(Build.ArtifactStagingDirectory)/smoke'
+      displayName: 'publish smoke logs'
+      condition: succeededOrFailed()
+      artifact: 'Smoke-$(Agent.OS)-Node$(nodeVersion)-$(System.JobId)'

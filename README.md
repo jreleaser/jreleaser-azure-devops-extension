@@ -211,6 +211,22 @@ Use these values in the `command` input.
 | `templateGenerate` | `jreleaser template generate` |
 | `upload` | `jreleaser upload` |
 
+## CI validation
+
+The existing Azure Build pipeline and the manual release pipeline share the same build and test stages:
+
+- `Build` installs locked dependencies with `npm ci`, runs both task test suites, and runs the package smoke regression tests against the assembled task artifacts. It then creates one VSIX.
+- `Test` downloads that same VSIX on Ubuntu 24.04 and Windows Server 2022, with Node 16, 20, and 24. Each job verifies installation, checksums, cache reuse, executable paths, and Invoker success/failure using JReleaser 1.26.0. Logs are saved as `Smoke-<OS>-Node<version>-<JobId>` pipeline artifacts so reruns preserve each attempt's logs without name collisions.
+- The manual release pipeline publishes the tested VSIX only after every test job succeeds. It does not repackage it.
+
+Normal CI packages use version `0.0.<BuildId>`. Release builds require a version tag and apply that version before packaging and testing. Pushing a commit does not publish an extension.
+
+To run the smoke regression tests locally after installing dependencies in both task directories:
+
+```sh
+npm run test:smoke
+```
+
 ## Roadmap
 
 Possible future improvements:

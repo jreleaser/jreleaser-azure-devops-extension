@@ -1,12 +1,21 @@
+parameters:
+- name: release
+  type: boolean
+  default: false
+
 stages:
 - stage: Build
   jobs:
   - job: Build_JReleaser_Installer
     steps:
+    - task: UseNode@1
+      inputs:
+        version: '24.x'
     - task: Npm@1
       displayName: 'install'
       inputs:
-        command: install
+        command: custom
+        customCommand: 'ci'
         workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserInstaller
     - task: Npm@1
       displayName: 'build'
@@ -40,10 +49,14 @@ stages:
 
   - job: Build_JReleaser_Task
     steps:
+    - task: UseNode@1
+      inputs:
+        version: '24.x'
     - task: Npm@1
       displayName: 'install'
       inputs:
-        command: install
+        command: custom
+        customCommand: 'ci'
         workingDir: $(System.DefaultWorkingDirectory)/tasks/JReleaserTask
     - task: Npm@1
       displayName: 'build'
@@ -82,40 +95,78 @@ stages:
     steps:
     - checkout: self
       clean: true
+    - task: UseNode@1
+      inputs:
+        version: '24.x'
     - task: DownloadPipelineArtifact@2
       displayName: 'download JReleaserInstaller'
       inputs:
         artifact: JReleaserInstaller
-        path: $(Pipeline.Workspace)/assembled/tasks/JReleaserInstaller
+        path: $(Build.SourcesDirectory)/tasks/JReleaserInstaller
     - task: DownloadPipelineArtifact@2
       displayName: 'download JReleaserTask'
       inputs:
         artifact: JReleaserTask
-        path: $(Pipeline.Workspace)/assembled/tasks/JReleaserTask
+        path: $(Build.SourcesDirectory)/tasks/JReleaserTask
+    - script: node --test
+      displayName: 'run package smoke regression tests'
+      workingDirectory: $(Build.SourcesDirectory)/scripts/tests
     - task: CopyFiles@2
       displayName: 'stage extension files'
       inputs:
         Contents: |
-          **/*
-          !**/*.ts
-          !tasks/JReleaserInstaller/**
-          !tasks/JReleaserTask/**
-          !templates/**
+          README.md
+          LICENSE
+          jreleaser-azure-devops-extension.json
+          images/**
+          screenshots/**
         TargetFolder: '$(Build.ArtifactStagingDirectory)/JReleaserExtension'
         OverWrite: true
     - task: CopyFiles@2
       displayName: 'copy assembled installer task'
       inputs:
-        SourceFolder: '$(Pipeline.Workspace)/assembled/tasks/JReleaserInstaller'
-        Contents: '**/*'
+        SourceFolder: '$(Build.SourcesDirectory)/tasks/JReleaserInstaller'
+        Contents: |
+          **/*
+          !**/*.ts
+          !**/tests/**
         TargetFolder: '$(Build.ArtifactStagingDirectory)/JReleaserExtension/tasks/JReleaserInstaller'
         OverWrite: true
     - task: CopyFiles@2
       displayName: 'copy assembled invoker task'
       inputs:
-        SourceFolder: '$(Pipeline.Workspace)/assembled/tasks/JReleaserTask'
-        Contents: '**/*'
+        SourceFolder: '$(Build.SourcesDirectory)/tasks/JReleaserTask'
+        Contents: |
+          **/*
+          !**/*.ts
+          !**/tests/**
         TargetFolder: '$(Build.ArtifactStagingDirectory)/JReleaserExtension/tasks/JReleaserTask'
         OverWrite: true
-    - publish: '$(Build.ArtifactStagingDirectory)/JReleaserExtension'
-      artifact: JReleaserExtension
+    - ${{ if eq(parameters.release, true) }}:
+      - bash: |
+          set -euo pipefail
+          if [[ "$BUILD_SOURCEBRANCH" != refs/tags/* ]]; then
+            echo "Release builds require a version tag."
+            exit 1
+          fi
+          node "$BUILD_SOURCESDIRECTORY/scripts/set-release-version.cjs" "${BUILD_SOURCEBRANCH#refs/tags/}"
+        displayName: 'set release version from tag'
+        workingDirectory: $(Build.ArtifactStagingDirectory)/JReleaserExtension
+    - ${{ else }}:
+      - script: node "$(Build.SourcesDirectory)/scripts/set-release-version.cjs" "0.0.$(Build.BuildId)"
+        displayName: 'set CI package version'
+        workingDirectory: $(Build.ArtifactStagingDirectory)/JReleaserExtension
+    - task: TfxInstaller@5
+      inputs:
+        version: '0.14.0'
+    - task: PackageAzureDevOpsExtension@5
+      displayName: 'package the extension once'
+      inputs:
+        rootFolder: '$(Build.ArtifactStagingDirectory)/JReleaserExtension'
+        patternManifest: 'jreleaser-azure-devops-extension.json'
+        outputPath: '$(Build.ArtifactStagingDirectory)/jreleaser-azure-devops-extension.vsix'
+        updateTasksVersion: false
+        extensionVisibility: 'public_preview'
+        extensionPricing: 'free'
+    - publish: '$(Build.ArtifactStagingDirectory)/jreleaser-azure-devops-extension.vsix'
+      artifact: JReleaserExtension-vsix

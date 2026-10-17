@@ -1,90 +1,24 @@
-parameters:
-- name: marketplacePublisher
-  type: string
-- name: marketplaceExtensionName
-  type: string
-- name: marketplaceExtensionId
-  type: string
-- name: extensionVisibility
-  type: string
-- name: shareWith
-  type: string
-  default: ''
-- name: unpublishFirst
-  type: boolean
-  default: false
-
 stages:
 - stage: Publish_JReleaser_Extension
-  dependsOn:
-  - Build
+  dependsOn: Test
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
   jobs:
   - job: Publish_JReleaser_Extension
     steps:
-    - checkout: self
-      fetchTags: true
-      clean: true
-    - task: CmdLine@2
-      displayName: 'set release version'
-      inputs:
-        script: |
-          source_branch="$(Build.SourceBranch)"
-          if [[ "$source_branch" != refs/tags/* ]]; then
-            echo "Build was not triggered by a tag, exiting."
-            exit 1
-          fi
-          version="${source_branch#refs/tags/}"
-          version="${version#v}"
-          echo "##vso[task.setvariable variable=extensionVersion]$version"
+    - checkout: none
     - task: DownloadPipelineArtifact@2
-      displayName: 'download JReleaserExtension'
+      displayName: 'download the tested VSIX'
       inputs:
-        artifact: JReleaserExtension
-        path: $(System.DefaultWorkingDirectory)
-    - task: CmdLine@2
-      displayName: 'update extension and task versions'
-      inputs:
-        script: |
-          node scripts/set-release-version.cjs "$EXTENSION_VERSION"
-      env:
-        EXTENSION_VERSION: $(extensionVersion)
+        artifact: JReleaserExtension-vsix
+        path: $(Pipeline.Workspace)/JReleaserExtension-vsix
     - task: TfxInstaller@5
-      displayName: 'install tfx-cli'
       inputs:
-        version: '0.14.x'
-        checkLatest: true
-    - ${{ if eq(parameters.unpublishFirst, true) }}:
-      - task: UnpublishAzureDevOpsExtension@5
-        inputs:
-          connectTo: 'VsTeam'
-          connectedServiceName: 'jreleaser_publish'
-          method: 'id'
-          publisherId: '${{ parameters.marketplacePublisher }}'
-          extensionId: '${{ parameters.marketplaceExtensionId }}'
-    - task: PackageAzureDevOpsExtension@5
-      inputs:
-        rootFolder: '$(System.DefaultWorkingDirectory)'
-        patternManifest: 'jreleaser-azure-devops-extension.json'
-        outputPath: 'jreleaser-azure-devops-extension.vsix'
-        updateTasksVersion: false
-        extensionName: '${{ parameters.marketplaceExtensionName }}'
-        extensionId: '${{ parameters.marketplaceExtensionId }}'
-        extensionVersion: '$(extensionVersion)'
-        extensionVisibility: '${{ parameters.extensionVisibility }}'
-        extensionPricing: 'free'
+        version: '0.14.0'
     - task: PublishAzureDevOpsExtension@5
       name: publish
       inputs:
         connectTo: 'VsTeam'
         connectedServiceName: 'jreleaser_publish'
         fileType: 'vsix'
-        vsixFile: 'jreleaser-azure-devops-extension.vsix'
+        vsixFile: '$(Pipeline.Workspace)/JReleaserExtension-vsix/jreleaser-azure-devops-extension.vsix'
         updateTasksVersion: false
-        ${{ if ne(parameters.shareWith, '') }}:
-          shareWith: '${{ parameters.shareWith }}'
-    - publish: 'jreleaser-azure-devops-extension.vsix'
-      artifact: JReleaserExtension-vsix
-    - task: CmdLine@2
-      displayName: 'wait for 1 minute'
-      inputs:
-        script: 'sleep 60'

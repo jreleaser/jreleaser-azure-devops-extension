@@ -1,31 +1,14 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 name: $(Build.BuildID)
 
 trigger: none
 pr: none
 
-resources:
-  - repo: self
-
 pool:
-  vmImage: ubuntu-latest
+  vmImage: ubuntu-24.04
 
-variables:
-  marketplace_publisher: 'jreleaser'
-  marketplace_extensionName: 'JReleaser'
-  marketplace_extensionId: 'jreleaser-azure-devops-extension'
-  
 stages:
-- template: templates/publish-build-stage.yml
-
-- template: templates/publish-vsix-stage.yml
+- template: templates/build-stage.yml
   parameters:
-    marketplacePublisher: $(marketplace_publisher)
-    marketplaceExtensionName: $(marketplace_extensionName)
-    marketplaceExtensionId: $(marketplace_extensionId)
-    extensionVisibility: 'public preview'
-    unpublishFirst: false
+    release: true
+- template: templates/test-stage.yml
+- template: templates/publish-vsix-stage.yml
