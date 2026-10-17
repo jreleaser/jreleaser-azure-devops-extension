@@ -6,6 +6,7 @@
 name: $(Build.BuildID)
 
 trigger: none
+pr: none
 
 parameters:
 - name: version
