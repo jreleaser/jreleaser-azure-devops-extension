@@ -5,6 +5,7 @@
   "scripts": {
     "release:set-version": "node scripts/set-release-version.cjs",
     "package:test": "npx --yes tfx-cli@0.14.0 extension create --manifest-globs jreleaser-azure-devops-extension.json",
+    "test:smoke": "npm --prefix tasks/JReleaserInstaller run build && npm --prefix tasks/JReleaserTask run build && cd scripts/tests && node --test",
     "format": "prettier --write .",
     "format-check": "prettier --check ."
   },

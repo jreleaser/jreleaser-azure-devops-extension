@@ -14,13 +14,12 @@ import {
 const TOOL_NAME = 'jreleaser';
 
 async function run() {
-  const standAlone: boolean = true; // TODO: Add support for jreleaser-tool-provider
   let version = tl.getInput('version', true).trim();
   if (version === 'latest') {
     version = await getLatestVersion();
   }
 
-  const jreleaserRelease: JReleaserRelease = await getJReleaserRelease(version, standAlone);
+  const jreleaserRelease: JReleaserRelease = await getJReleaserRelease(version, true);
   console.log(`Downloading JReleaser ${jreleaserRelease.name}`);
   console.log(`Release URL: ${jreleaserRelease.releaseUrl}`);
   console.log(`Checksum URL: ${jreleaserRelease.checksumUrl}`);
@@ -46,27 +45,20 @@ async function run() {
     );
   }
 
-  if (standAlone) {
-    const unzipPath: string = await unzipJReleaserRelease(path.join(toolFilePath));
-
-    console.log(`ADD ToolLib Path: ${path.join(unzipPath, jreleaserRelease.name, 'bin')}`);
-    toolLib.prependPath(path.join(unzipPath, jreleaserRelease.name, 'bin'));
-  } else {
-    console.log('TODO: Add support for jreleaser-tool-provider');
-    // TODO: Add support for jreleaser-tool-provider
-  }
+  const unzipPath: string = await unzipJReleaserRelease(toolFilePath);
+  const binDirectory = path.join(unzipPath, jreleaserRelease.name, 'bin');
+  await verifyJReleaser(binDirectory);
+  toolLib.prependPath(binDirectory);
 }
 
-async function verifyJReleaser() {
+async function verifyJReleaser(binDirectory: string) {
   console.log('Verifying JReleaser installation');
-  const jreleaserPath = tl.which('jreleaser', true);
+  const jreleaserPath = tl.which(path.join(binDirectory, 'jreleaser'), true);
   const jreleaser = tl.tool(jreleaserPath);
   jreleaser.arg('--version');
   return jreleaser.exec();
 }
 
-run()
-  .then(() => verifyJReleaser())
-  .catch(error => {
-    tl.setResult(tl.TaskResult.Failed, error);
-  });
+run().catch(error => {
+  tl.setResult(tl.TaskResult.Failed, error);
+});

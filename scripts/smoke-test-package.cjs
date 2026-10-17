@@ -51,6 +51,29 @@ try {
   const req = createRequire(path.join(installer, 'package.json'));
   const toolReq = createRequire(req.resolve('azure-pipelines-tool-lib/package.json'));
   assert.equal(req.resolve('azure-pipelines-task-lib/task'), toolReq.resolve('azure-pipelines-task-lib/task'));
+  const pathKey = Object.keys(env).find(key => key.toLowerCase() === 'path');
+  function installedEnvironment(stage, text) {
+    const paths = [...text.matchAll(/^##vso\[task.prependpath\]([^\r\n]+)/gm)];
+    assert.equal(paths.length, 1, 'Installer must publish exactly one bin directory');
+    const bin = paths[0][1];
+    assert.ok(fs.realpathSync(bin).startsWith(fs.realpathSync(runtime) + path.sep),
+      'Installed bin directory must belong to this test run');
+    const inputs = { [pathKey]: bin + path.delimiter + env[pathKey], INPUT_LOGLEVEL: 'info' };
+    const verifyPath = `try {
+      const assert = require('node:assert/strict');
+      const fs = require('node:fs');
+      const path = require('node:path');
+      const task = require('azure-pipelines-task-lib/task');
+      const bin = process.argv[1];
+      const expected = fs.realpathSync(task.which(path.join(bin, 'jreleaser'), true));
+      assert.equal(path.dirname(expected), fs.realpathSync(bin));
+      assert.equal(fs.realpathSync(task.which('jreleaser', true)), expected);
+      console.log('JRELEASER_EXECUTABLE_VERIFIED');
+    } catch (error) { console.error(error); process.exitCode = 1; }`;
+    assert.match(run(stage + '-path', ['-e', verifyPath, bin], inputs, false, invoker),
+      /^JRELEASER_EXECUTABLE_VERIFIED$/m);
+    return inputs;
+  }
   const probe = `try {
     require('azure-pipelines-tool-lib/tool');
     require('node:assert/strict').equal(require('azure-pipelines-task-lib/task').getInput('version', true), '${version}');
@@ -61,12 +84,11 @@ try {
   const installed = run('install', [entry], { INPUT_VERSION: version });
   assert.match(installed, /Verified JReleaser release checksum/);
   assert.ok(installed.includes(`jreleaser ${version}`));
+  installedEnvironment('install', installed);
   const cached = run('cache', [entry], { INPUT_VERSION: version });
   assert.match(cached, /was found in the local cache/);
   assert.ok(cached.includes(`jreleaser ${version}`));
-  const bin = cached.match(/ADD ToolLib Path: (.+)/)[1].trim();
-  const pathKey = Object.keys(env).find(key => key.toLowerCase() === 'path');
-  const inputs = { [pathKey]: bin + path.delimiter + env[pathKey], INPUT_LOGLEVEL: 'info' };
+  const inputs = installedEnvironment('cache', cached);
   const runner = path.join(invoker, 'dist/jreleaserTask.js');
   const invoked = run('version', [runner], { ...inputs, INPUT_COMMAND: 'custom', INPUT_ARGUMENTS: '--version' });
   assert.ok(invoked.includes(`jreleaser ${version}`));

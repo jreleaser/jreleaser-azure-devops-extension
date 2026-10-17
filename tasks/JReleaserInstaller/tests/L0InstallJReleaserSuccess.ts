@@ -9,12 +9,13 @@ let tmr: tmrm.TaskMockRunner = new tmrm.TaskMockRunner(taskPath);
 const tempDir = path.join(__dirname, 'temp');
 const callOrder: string[] = [];
 const findLocalToolCalls: unknown[][] = [];
+const installedBin = path.join(tempDir, 'jreleaser', '1.7.0', 'x64', 'jreleaser-standalone-1.7.0-linux-x86_64', 'bin');
+const installedExecutable = path.join(installedBin, 'jreleaser');
 
 process.env['AGENT_TOOLSDIRECTORY'] = tempDir;
 process.env['AGENT_TEMPDIRECTORY'] = tempDir;
 
 tmr.setInput('version', '1.7.0');
-tmr.setInput('standalone', 'true');
 
 if (!fs.existsSync(tempDir)) {
   fs.mkdirSync(tempDir);
@@ -59,7 +60,7 @@ tmr.registerMock(`./utils`, {
       callOrder.push('unzip');
       assert.deepEqual(callOrder, ['download', 'verify', 'cache', 'unzip']);
       const extractDir = path.join(tempDir, 'jreleaser', '1.7.0', 'x64');
-      fs.mkdirSync(path.join(extractDir, 'bin'), { recursive: true });
+      fs.mkdirSync(installedBin, { recursive: true });
       resolve(extractDir);
     });
   },
@@ -83,26 +84,20 @@ tmr.registerMock('azure-pipelines-tool-lib/tool', {
     });
   },
   prependPath: function (A) {
-    return new Promise(async resolve => {
-      resolve(A);
-    });
+    assert.equal(A, installedBin);
+    assert.deepEqual(callOrder, ['download', 'verify', 'cache', 'unzip', 'execute']);
   },
 });
 
 tmr.registerMockExport('tool', function (A) {
-  if (A == 'jreleaser') {
-    return {
-      arg: function () {},
-      exec: function () {
-        return new Promise(async resolve => {
-          resolve({
-            code: 0,
-            stdout: '1.7.0',
-          });
-        });
-      },
-    };
-  }
+  assert.equal(A, installedExecutable);
+  return {
+    arg: value => assert.equal(value, '--version'),
+    exec: async () => {
+      callOrder.push('execute');
+      return 0;
+    },
+  };
 });
 
 const a: ma.TaskLibAnswers = <ma.TaskLibAnswers>{
@@ -110,7 +105,7 @@ const a: ma.TaskLibAnswers = <ma.TaskLibAnswers>{
     [tempDir]: true,
   },
   checkPath: {
-    jreleaser: true,
+    [installedExecutable]: true,
   },
   exist: {
     [path.join(tempDir, 'jreleaser-standalone-1.7.0-windows-x86_64')]: true,
@@ -118,7 +113,7 @@ const a: ma.TaskLibAnswers = <ma.TaskLibAnswers>{
     [path.join(tempDir, 'jreleaser-standalone-1.7.0-osx-x86_64')]: true,
   },
   which: {
-    jreleaser: 'jreleaser',
+    [installedExecutable]: installedExecutable,
   },
 };
 tmr.setAnswers(a);
