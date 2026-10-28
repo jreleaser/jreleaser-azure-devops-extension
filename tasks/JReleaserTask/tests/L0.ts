@@ -55,48 +55,48 @@ function createContext(argumentsValue: string, overrides: Partial<ITaskContext> 
 }
 
 describe('JReleaserTask L0 Suite', () => {
-  it('Does a basic hello world test', () => {
-    assert.ok(true);
-  });
-
-  it('parses simple custom arguments', () => {
+  it('parses custom flags and preserves quoted values and paths', () => {
     const command = new JReleaserCustom({} as ToolRunner);
-
-    command.initialize(createContext('--debug --dry-run'));
-
-    assert.deepEqual(command.options, ['--debug', '--dry-run']);
+    command.initialize(
+      createContext(
+        '--debug --dry-run --set-property project.name="My App" --config-file "/tmp/My Project/jreleaser.yml"',
+      ),
+    );
+    assert.deepEqual(command.options, [
+      '--debug',
+      '--dry-run',
+      '--set-property',
+      'project.name=My App',
+      '--config-file',
+      '/tmp/My Project/jreleaser.yml',
+    ]);
   });
 
-  it('preserves spaces inside quoted custom argument values', () => {
-    const command = new JReleaserCustom({} as ToolRunner);
-
-    command.initialize(createContext('--set-property project.name="My App"'));
-
-    assert.deepEqual(command.options, ['--set-property', 'project.name=My App']);
-  });
-
-  it('preserves spaces inside quoted custom argument paths', () => {
-    const command = new JReleaserCustom({} as ToolRunner);
-
-    command.initialize(createContext('--config-file "/tmp/My Project/jreleaser.yml"'));
-
-    assert.deepEqual(command.options, ['--config-file', '/tmp/My Project/jreleaser.yml']);
-  });
-
-  it('does not define a false default for the properties string input', () => {
+  it('matches the task input defaults, required fields and visibility contract', () => {
     const taskDefinition = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'task.json'), 'utf8'));
-    const propertiesInput = taskDefinition.inputs.find((input: { name: string }) => input.name === 'properties');
-
-    assert.ok(propertiesInput);
-    assert.equal(propertiesInput.defaultValue ?? '', '');
-  });
-
-  it('does not define a default base directory so an empty input means auto basedir', () => {
-    const taskDefinition = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'task.json'), 'utf8'));
-    const baseDirectoryInput = taskDefinition.inputs.find((input: { name: string }) => input.name === 'baseDirectory');
-
-    assert.ok(baseDirectoryInput);
-    assert.equal(baseDirectoryInput.defaultValue ?? '', '');
+    const input = (name: string) => {
+      const found = taskDefinition.inputs.find((candidate: { name: string }) => candidate.name === name);
+      assert.ok(found, `Missing task input: ${name}`);
+      return found;
+    };
+    for (const name of ['properties', 'baseDirectory']) {
+      assert.equal(input(name).defaultValue ?? '', '', name);
+    }
+    for (const name of [
+      'templateGenerateAnnouncer',
+      'templateGenerateAssemblerType',
+      'templateGenerateAssemblerName',
+      'templateGenerateDistribution',
+      'templateGeneratePackager',
+    ]) {
+      assert.equal(input(name).required, false, name);
+    }
+    for (const name of ['templateGenerateDistribution', 'templateGeneratePackager']) {
+      assert.equal(input(name).visibleRule, 'command = templateGenerate && templateGenerateType = packager', name);
+    }
+    for (const name of ['distribution', 'packager', 'excludeDistribution', 'excludePackager']) {
+      assert.equal(input(name).visibleRule.includes('templateGenerate'), false, name);
+    }
   });
 
   it('resolves output properties basedir with JReleaser precedence', () => {
@@ -158,89 +158,67 @@ describe('JReleaserTask L0 Suite', () => {
     }
   });
 
-  it('does not add set-property when properties input is empty', () => {
-    const command = new JReleaserRelease({} as ToolRunner);
-
-    command.initialize(
-      createContext('', {
-        command: 'release',
-        configFile: '/tmp/jreleaser.yml',
-        properties: '',
-      }),
-    );
-
-    assert.equal(command.options.includes('--set-property'), false);
+  it('adds set-property only when properties input is supplied', () => {
+    for (const [properties, expected] of [
+      ['', []],
+      ['project.version=1.2.3', ['--set-property', 'project.version=1.2.3']],
+    ] as const) {
+      const command = new JReleaserRelease({} as ToolRunner);
+      command.initialize(
+        createContext('', {
+          command: 'release',
+          configFile: '/tmp/jreleaser.yml',
+          properties,
+        }),
+      );
+      assert.deepEqual(
+        command.options,
+        ['release', '--config-file', '/tmp/jreleaser.yml', ...expected],
+        `properties=${JSON.stringify(properties)}`,
+      );
+    }
   });
 
-  it('adds set-property when properties input is set', () => {
-    const command = new JReleaserRelease({} as ToolRunner);
-
-    command.initialize(
-      createContext('', {
-        command: 'release',
-        configFile: '/tmp/jreleaser.yml',
-        properties: 'project.version=1.2.3',
-      }),
-    );
-
-    assert.ok(command.options.includes('--set-property'));
-    assert.deepEqual(command.options.slice(command.options.indexOf('--set-property')), [
-      '--set-property',
-      'project.version=1.2.3',
-    ]);
-  });
-
-  it('does not add unsupported exclude options to template generate', () => {
-    const command = new JReleaserTemplateGenerate({} as ToolRunner);
-
-    command.initialize(
-      createContext('', {
-        command: 'templateGenerate',
-        distribution: 'app',
-        packager: 'brew',
-        excludeDistribution: 'oldapp',
-        excludePackager: 'scoop',
-      }),
-    );
-
-    assert.ok(command.options.includes('--distribution'));
-    assert.ok(command.options.includes('--packager'));
-    assert.equal(command.options.includes('--exclude-distribution'), false);
-    assert.equal(command.options.includes('--exclude-packager'), false);
-  });
-
-  it('does not show exclude inputs for template generate', () => {
-    const taskDefinition = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'task.json'), 'utf8'));
-    const excludeDistributionInput = taskDefinition.inputs.find(
-      (input: { name: string }) => input.name === 'excludeDistribution',
-    );
-    const excludePackagerInput = taskDefinition.inputs.find(
-      (input: { name: string }) => input.name === 'excludePackager',
-    );
-
-    assert.ok(excludeDistributionInput);
-    assert.ok(excludePackagerInput);
-    assert.equal(excludeDistributionInput.visibleRule.includes('templateGenerate'), false);
-    assert.equal(excludePackagerInput.visibleRule.includes('templateGenerate'), false);
-  });
-
-  it('builds template generate packager arguments', () => {
-    const command = new JReleaserTemplateGenerate({} as ToolRunner);
-
-    command.initialize(
-      createContext('', {
-        command: 'templateGenerate',
-        templateGenerateType: 'packager',
-        templateGenerateDistribution: 'app',
-        templateGeneratePackager: 'brew',
-        templateGenerateDistributionType: 'JAVA_BINARY',
-      }),
-    );
-
-    assert.deepEqual(
-      command.options.filter(option => option !== undefined),
-      ['template', 'generate', '--distribution', 'app', '--packager', 'brew', '--distribution-type', 'JAVA_BINARY'],
-    );
+  it('keeps packager output-directory independent of overwrite and snapshot flags', () => {
+    for (const [overwrite, snapshot, expectedFlags] of [
+      [false, false, []],
+      [true, false, ['--overwrite']],
+      [false, true, ['--snapshot']],
+      [true, true, ['--overwrite', '--snapshot']],
+    ] as const) {
+      const command = new JReleaserTemplateGenerate({} as ToolRunner);
+      command.initialize(
+        createContext('', {
+          command: 'templateGenerate',
+          templateGenerateType: ' packager ',
+          templateGenerateDistribution: ' app ',
+          templateGeneratePackager: ' brew ',
+          templateGenerateDistributionType: ' JAVA_BINARY ',
+          templateGenerateOverwrite: overwrite,
+          templateGenerateSnapshot: snapshot,
+          templateGenerateOutputDirectory: ' /tmp/templates ',
+          excludeDistribution: 'oldapp',
+          excludePackager: 'scoop',
+        }),
+      );
+      assert.deepEqual(
+        command.options,
+        [
+          'template',
+          'generate',
+          '--distribution',
+          'app',
+          '--packager',
+          'brew',
+          '--distribution-type',
+          'JAVA_BINARY',
+          ...expectedFlags,
+          '--output-directory',
+          '/tmp/templates',
+        ],
+        `overwrite=${overwrite}, snapshot=${snapshot}`,
+      );
+    }
   });
 
   it('builds template generate announcer arguments', () => {
@@ -254,10 +232,7 @@ describe('JReleaserTask L0 Suite', () => {
       }),
     );
 
-    assert.deepEqual(
-      command.options.filter(option => option !== undefined),
-      ['template', 'generate', '--announcer', 'slack'],
-    );
+    assert.deepEqual(command.options, ['template', 'generate', '--announcer', 'slack']);
   });
 
   it('builds template generate assembler arguments', () => {
@@ -272,116 +247,42 @@ describe('JReleaserTask L0 Suite', () => {
       }),
     );
 
-    assert.deepEqual(
-      command.options.filter(option => option !== undefined),
-      ['template', 'generate', '--assembler-type', 'archive', '--assembler-name', 'app'],
-    );
-  });
-
-  it('builds template generate common options', () => {
-    const command = new JReleaserTemplateGenerate({} as ToolRunner);
-
-    command.initialize(
-      createContext('', {
-        command: 'templateGenerate',
-        templateGenerateType: 'packager',
-        templateGenerateDistribution: 'app',
-        templateGeneratePackager: 'brew',
-        templateGenerateOverwrite: true,
-        templateGenerateSnapshot: true,
-        templateGenerateOutputDirectory: '/tmp/templates',
-      }),
-    );
-
-    assert.ok(command.options.includes('--overwrite'));
-    assert.ok(command.options.includes('--snapshot'));
-    const outputDirectoryIndex = command.options.indexOf('--output-directory');
-
-    assert.deepEqual(command.options.slice(outputDirectoryIndex, outputDirectoryIndex + 2), [
-      '--output-directory',
-      '/tmp/templates',
+    assert.deepEqual(command.options, [
+      'template',
+      'generate',
+      '--assembler-type',
+      'archive',
+      '--assembler-name',
+      'app',
     ]);
   });
 
-  it('fails template generate packager mode when required inputs are missing', () => {
-    const command = new JReleaserTemplateGenerate({} as ToolRunner);
-
-    assert.throws(
-      () =>
-        command.initialize(
-          createContext('', {
-            command: 'templateGenerate',
-            templateGenerateType: 'packager',
-            templateGenerateDistribution: 'app',
-            templateGeneratePackager: '',
-          }),
-        ),
-      /templateGenerate packager mode requires distribution and packager/,
-    );
-  });
-
-  it('fails template generate announcer mode when announcer is missing', () => {
-    const command = new JReleaserTemplateGenerate({} as ToolRunner);
-
-    assert.throws(
-      () =>
-        command.initialize(
-          createContext('', {
-            command: 'templateGenerate',
-            templateGenerateType: 'announcer',
-            templateGenerateAnnouncer: '',
-          }),
-        ),
-      /templateGenerate announcer mode requires templateGenerateAnnouncer/,
-    );
-  });
-
-  it('fails template generate assembler mode when assembler inputs are missing', () => {
-    const command = new JReleaserTemplateGenerate({} as ToolRunner);
-
-    assert.throws(
-      () =>
-        command.initialize(
-          createContext('', {
-            command: 'templateGenerate',
-            templateGenerateType: 'assembler',
-            templateGenerateAssemblerType: 'archive',
-            templateGenerateAssemblerName: '',
-          }),
-        ),
-      /templateGenerate assembler mode requires templateGenerateAssemblerType and templateGenerateAssemblerName/,
-    );
-  });
-
-  it('trims template generate input values before adding options', () => {
-    const command = new JReleaserTemplateGenerate({} as ToolRunner);
-
-    command.initialize(
-      createContext('', {
-        command: 'templateGenerate',
-        templateGenerateType: ' packager ',
-        templateGenerateDistribution: ' app ',
-        templateGeneratePackager: ' brew ',
-        templateGenerateDistributionType: ' JAVA_BINARY ',
-        templateGenerateOutputDirectory: ' /tmp/templates ',
-      }),
-    );
-
-    assert.deepEqual(
-      command.options.filter(option => option !== undefined),
+  it('rejects missing required inputs for each template generate mode', () => {
+    for (const [inputs, expectedError] of [
       [
-        'template',
-        'generate',
-        '--distribution',
-        'app',
-        '--packager',
-        'brew',
-        '--distribution-type',
-        'JAVA_BINARY',
-        '--output-directory',
-        '/tmp/templates',
+        { templateGenerateType: 'packager', templateGenerateDistribution: 'app', templateGeneratePackager: '' },
+        /templateGenerate packager mode requires distribution and packager/,
       ],
-    );
+      [
+        { templateGenerateType: 'announcer', templateGenerateAnnouncer: '' },
+        /templateGenerate announcer mode requires templateGenerateAnnouncer/,
+      ],
+      [
+        {
+          templateGenerateType: 'assembler',
+          templateGenerateAssemblerType: 'archive',
+          templateGenerateAssemblerName: '',
+        },
+        /templateGenerate assembler mode requires templateGenerateAssemblerType and templateGenerateAssemblerName/,
+      ],
+    ] as const) {
+      const command = new JReleaserTemplateGenerate({} as ToolRunner);
+      assert.throws(
+        () => command.initialize(createContext('', { command: 'templateGenerate', ...inputs })),
+        expectedError,
+        inputs.templateGenerateType,
+      );
+    }
   });
 
   it('allows custom arguments to bypass template generate mode validation', () => {
@@ -396,10 +297,7 @@ describe('JReleaserTask L0 Suite', () => {
       }),
     );
 
-    assert.deepEqual(
-      command.options.filter(option => option !== undefined),
-      ['template', 'generate', '--announcer', 'slack'],
-    );
+    assert.deepEqual(command.options, ['template', 'generate', '--announcer', 'slack']);
   });
 
   it('keeps selected mode inputs when custom arguments are present', () => {
@@ -413,10 +311,7 @@ describe('JReleaserTask L0 Suite', () => {
       }),
     );
 
-    assert.deepEqual(
-      command.options.filter(option => option !== undefined),
-      ['template', 'generate', '--snapshot', '--announcer', 'slack'],
-    );
+    assert.deepEqual(command.options, ['template', 'generate', '--snapshot', '--announcer', 'slack']);
   });
 
   it('keeps legacy template generate distribution and packager inputs working', () => {
@@ -431,60 +326,11 @@ describe('JReleaserTask L0 Suite', () => {
       }),
     );
 
-    assert.deepEqual(
-      command.options.filter(option => option !== undefined),
-      ['template', 'generate', '--distribution', 'app', '--packager', 'brew'],
-    );
+    assert.deepEqual(command.options, ['template', 'generate', '--distribution', 'app', '--packager', 'brew']);
   });
 
-  it('does not require template generate mode inputs in task json', () => {
-    const taskDefinition = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'task.json'), 'utf8'));
-    const optionalInputNames = [
-      'templateGenerateAnnouncer',
-      'templateGenerateAssemblerType',
-      'templateGenerateAssemblerName',
-      'templateGenerateDistribution',
-      'templateGeneratePackager',
-    ];
-
-    for (const inputName of optionalInputNames) {
-      const input = taskDefinition.inputs.find((taskInput: { name: string }) => taskInput.name === inputName);
-
-      assert.ok(input);
-      assert.equal(input.required, false);
-    }
-  });
-
-  it('uses dedicated template generate packager inputs in task json', () => {
-    const taskDefinition = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'task.json'), 'utf8'));
-    const templateGenerateDistributionInput = taskDefinition.inputs.find(
-      (input: { name: string }) => input.name === 'templateGenerateDistribution',
-    );
-    const templateGeneratePackagerInput = taskDefinition.inputs.find(
-      (input: { name: string }) => input.name === 'templateGeneratePackager',
-    );
-    const distributionInput = taskDefinition.inputs.find((input: { name: string }) => input.name === 'distribution');
-    const packagerInput = taskDefinition.inputs.find((input: { name: string }) => input.name === 'packager');
-
-    assert.equal(
-      templateGenerateDistributionInput.visibleRule,
-      'command = templateGenerate && templateGenerateType = packager',
-    );
-    assert.equal(
-      templateGeneratePackagerInput.visibleRule,
-      'command = templateGenerate && templateGenerateType = packager',
-    );
-    assert.equal(distributionInput.visibleRule.includes('templateGenerate'), false);
-    assert.equal(packagerInput.visibleRule.includes('templateGenerate'), false);
-  });
-  it('adds only the selected log-level argument', () => {
-    for (const [logLevel, expected] of [
-      ['', []],
-      ['debug', ['--debug']],
-      ['info', ['--info']],
-      ['warn', ['--warn']],
-      ['quiet', ['--quiet']],
-    ] as const) {
+  it('adds the selected log level to template generate arguments', () => {
+    for (const logLevel of ['debug', 'info', 'warn', 'quiet']) {
       const command = new JReleaserTemplateGenerate({} as ToolRunner);
       command.initialize(
         createContext('', {
@@ -494,7 +340,7 @@ describe('JReleaserTask L0 Suite', () => {
           logLevel,
         }),
       );
-      assert.deepEqual(command.options, ['template', 'generate', '--announcer', 'slack', ...expected]);
+      assert.deepEqual(command.options, ['template', 'generate', '--announcer', 'slack', `--${logLevel}`]);
     }
   });
 });
