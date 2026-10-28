@@ -3,55 +3,53 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { describe, it } from 'node:test';
 import type { ToolRunner } from 'azure-pipelines-task-lib/toolrunner';
-import { ITaskContext } from '../context';
+import type { ITaskContext } from '../context';
 import { JReleaserCustom } from '../commands/custom';
 import { JReleaserRelease } from '../commands/release';
 import { JReleaserTemplateGenerate } from '../commands/templateGenerate';
 import { getOutputPropertiesBaseDirectory } from '../baseDirectory';
 
 function createContext(argumentsValue: string, overrides: Partial<ITaskContext> = {}): ITaskContext {
-  return Object.assign(
-    {
-      command: 'custom',
-      baseDirectory: '',
-      logLevel: '',
-      arguments: argumentsValue,
-      dryRun: false,
-      exportOutputProperties: false,
-      setVariable: () => {},
-      configFile: '',
-      strict: false,
-      gitRootSearch: false,
-      properties: '',
-      selectCurrentPlatform: false,
-      selectPlatform: '',
-      rejectPlatform: '',
-      distribution: '',
-      packager: '',
-      excludeDistribution: '',
-      excludePackager: '',
-      initFormat: '',
-      initOverwrite: false,
-      configType: '',
-      configFull: false,
-      templateEvalTargetDirectory: '',
-      templateEvalOverwrite: false,
-      templateInputType: '',
-      templateEvalInput: '',
-      templateEvalType: '',
-      templateGenerateType: 'packager',
-      templateGenerateAnnouncer: '',
-      templateGenerateAssemblerType: '',
-      templateGenerateAssemblerName: '',
-      templateGenerateDistribution: '',
-      templateGeneratePackager: '',
-      templateGenerateDistributionType: '',
-      templateGenerateOverwrite: false,
-      templateGenerateSnapshot: false,
-      templateGenerateOutputDirectory: '',
-    },
-    overrides,
-  );
+  return {
+    command: 'custom',
+    baseDirectory: '',
+    logLevel: '',
+    arguments: argumentsValue,
+    dryRun: false,
+    exportOutputProperties: false,
+    setVariable: () => {},
+    configFile: '',
+    strict: false,
+    gitRootSearch: false,
+    properties: '',
+    selectCurrentPlatform: false,
+    selectPlatform: '',
+    rejectPlatform: '',
+    distribution: '',
+    packager: '',
+    excludeDistribution: '',
+    excludePackager: '',
+    initFormat: '',
+    initOverwrite: false,
+    configType: '',
+    configFull: false,
+    templateEvalTargetDirectory: '',
+    templateEvalOverwrite: false,
+    templateInputType: '',
+    templateEvalInput: '',
+    templateEvalType: '',
+    templateGenerateType: 'packager',
+    templateGenerateAnnouncer: '',
+    templateGenerateAssemblerType: '',
+    templateGenerateAssemblerName: '',
+    templateGenerateDistribution: '',
+    templateGeneratePackager: '',
+    templateGenerateDistributionType: '',
+    templateGenerateOverwrite: false,
+    templateGenerateSnapshot: false,
+    templateGenerateOutputDirectory: '',
+    ...overrides,
+  };
 }
 
 describe('JReleaserTask L0 Suite', () => {
@@ -235,6 +233,21 @@ describe('JReleaserTask L0 Suite', () => {
     assert.deepEqual(command.options, ['template', 'generate', '--announcer', 'slack']);
   });
 
+  it('adds the selected log level to template generate arguments', () => {
+    for (const logLevel of ['debug', 'info', 'warn', 'quiet']) {
+      const command = new JReleaserTemplateGenerate({} as ToolRunner);
+      command.initialize(
+        createContext('', {
+          command: 'templateGenerate',
+          templateGenerateType: 'announcer',
+          templateGenerateAnnouncer: 'slack',
+          logLevel,
+        }),
+      );
+      assert.deepEqual(command.options, ['template', 'generate', '--announcer', 'slack', `--${logLevel}`]);
+    }
+  });
+
   it('builds template generate assembler arguments', () => {
     const command = new JReleaserTemplateGenerate({} as ToolRunner);
 
@@ -327,20 +340,5 @@ describe('JReleaserTask L0 Suite', () => {
     );
 
     assert.deepEqual(command.options, ['template', 'generate', '--distribution', 'app', '--packager', 'brew']);
-  });
-
-  it('adds the selected log level to template generate arguments', () => {
-    for (const logLevel of ['debug', 'info', 'warn', 'quiet']) {
-      const command = new JReleaserTemplateGenerate({} as ToolRunner);
-      command.initialize(
-        createContext('', {
-          command: 'templateGenerate',
-          templateGenerateType: 'announcer',
-          templateGenerateAnnouncer: 'slack',
-          logLevel,
-        }),
-      );
-      assert.deepEqual(command.options, ['template', 'generate', '--announcer', 'slack', `--${logLevel}`]);
-    }
   });
 });

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "clean": "tsc --build --clean",
-    "test": "tsc --project tsconfig.test.json && node --test ./dist/tests/index.js"
+    "test": "tsc --project tsconfig.test.json && cd dist/tests && node --test"
   },
   "dependencies": {
     "azure-pipelines-task-lib": "5.281.2",

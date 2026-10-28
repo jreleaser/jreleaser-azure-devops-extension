@@ -43,7 +43,7 @@ function createFixture(t: TestContext, contents: string | null) {
   return { ctx, logger, variables, warnings, debugMessages };
 }
 
-describe('JReleaser output properties', () => {
+describe('JReleaserTask L0 output properties', () => {
   it('exports normalized Azure output variables after a successful command', t => {
     const { ctx, logger, variables, warnings, debugMessages } = createFixture(
       t,

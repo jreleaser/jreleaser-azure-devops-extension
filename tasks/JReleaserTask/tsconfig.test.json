@@ -1,11 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "ES6",
-    "module": "commonjs",
-    "types": ["node"],
-    "outDir": "./dist",
-    "useUnknownInCatchVariables": false
-  },
-  "include": ["./**/*.ts"],
+  "extends": "./tsconfig.json",
   "exclude": ["node_modules"]
 }

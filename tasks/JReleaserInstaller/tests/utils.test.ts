@@ -2,9 +2,9 @@ import * as path from 'node:path';
 import * as os from 'node:os';
 import * as fs from 'node:fs';
 import * as crypto from 'node:crypto';
-import { execFileSync } from 'node:child_process';
-import { createServer, Server } from 'node:http';
-import { AddressInfo } from 'node:net';
+import { createServer } from 'node:http';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import * as assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import type { TestContext } from 'node:test';
@@ -29,7 +29,7 @@ function sha256(contents: string): string {
   return crypto.createHash('sha256').update(contents).digest('hex');
 }
 
-describe('JReleaserInstaller utility suite', () => {
+describe('JReleaserInstaller L0 utilities', () => {
   it('detects musl from the glibc report and loader presence', () => {
     for (const [header, loaderExists, expected] of [
       [{}, true, true],
@@ -249,19 +249,5 @@ describe('JReleaserInstaller utility suite', () => {
         ),
       /Checksum entry not found for jreleaser-standalone-1\.23\.0-linux-x86_64\.zip/,
     );
-  });
-});
-
-describe('JReleaserInstaller L0 Suite', () => {
-  it('verifies installation before publishing the bin directory', t => {
-    const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'jreleaser-install-'));
-    t.after(() => fs.rmSync(tempDirectory, { recursive: true, force: true }));
-    const stdout = execFileSync(process.execPath, [path.join(__dirname, 'L0InstallJReleaserSuccess.js')], {
-      env: { ...process.env, AGENT_TOOLSDIRECTORY: tempDirectory, AGENT_TEMPDIRECTORY: tempDirectory },
-      encoding: 'utf8',
-      timeout: 10000,
-    });
-    assert.match(stdout, /^JRELEASER_INSTALL_VERIFIED$/m);
-    assert.doesNotMatch(stdout, /##vso\[task\.complete result=Failed[;\]]/);
   });
 });

@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import type { TaskLibAnswers } from 'azure-pipelines-task-lib/mock-answer';
 import { TaskMockRunner } from 'azure-pipelines-task-lib/mock-run';
 
-const taskRunner = new TaskMockRunner(path.join(__dirname, '../installer.js'));
+const taskRunner = new TaskMockRunner(path.join(__dirname, '../../installer.js'));
 const tempDirectory = process.env.AGENT_TEMPDIRECTORY;
 assert.ok(tempDirectory);
 const callOrder: string[] = [];
