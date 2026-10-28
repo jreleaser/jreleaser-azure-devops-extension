@@ -2,21 +2,21 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { spawnSync } = require('node:child_process');
 const { test } = require('node:test');
+const runSmoke = require('./run-smoke.cjs');
 
 const repo = path.resolve(__dirname, '../..');
-const windows = process.platform === 'win32';
-const launcher = windows ? 'jreleaser.cmd' : 'jreleaser';
+const isWindows = process.platform === 'win32';
+const launcher = isWindows ? 'jreleaser.cmd' : 'jreleaser';
 
-function fixture(t, missingStage, executable = true, faultyInstaller = false) {
+function runPackageSmoke(t, { missingStage, executable = true, useHostPathForValidation = false } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'jreleaser-path-test-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const candidate = path.join(root, 'package');
+  const packageDirectory = path.join(root, 'package');
   const calls = path.join(root, 'calls.txt');
   fs.writeFileSync(calls, '');
   const program = label =>
-    windows
+    isWindows
       ? `@echo off\r\necho ${label}>>"${calls}"\r\nif "%~1"=="--invalid-smoke-test-option" exit /b 2\r\necho jreleaser 1.26.0\r\n`
       : `#!${process.execPath}\nrequire('node:fs').appendFileSync(${JSON.stringify(calls)}, ${JSON.stringify(
           label + '\n',
@@ -29,14 +29,14 @@ function fixture(t, missingStage, executable = true, faultyInstaller = false) {
 
   for (const task of ['JReleaserInstaller', 'JReleaserTask']) {
     const source = path.join(repo, 'tasks', task);
-    const target = path.join(candidate, 'tasks', task);
+    const target = path.join(packageDirectory, 'tasks', task);
     fs.mkdirSync(target, { recursive: true });
     fs.cpSync(path.join(source, 'dist'), path.join(target, 'dist'), { recursive: true });
     fs.copyFileSync(path.join(source, 'package.json'), path.join(target, 'package.json'));
     fs.symlinkSync(path.join(source, 'node_modules'), path.join(target, 'node_modules'), 'junction');
   }
 
-  const dist = path.join(candidate, 'tasks/JReleaserInstaller/dist');
+  const dist = path.join(packageDirectory, 'tasks/JReleaserInstaller/dist');
   // Only transport/extraction are fixtures. Installer, cache, SDK resolution,
   // and Invoker are the actual built code, with an executable on the host PATH.
   fs.writeFileSync(
@@ -65,8 +65,8 @@ function fixture(t, missingStage, executable = true, faultyInstaller = false) {
     };
   `,
   );
-  if (faultyInstaller) {
-    // Reintroduce the reviewed bug only in this fixture: validation uses PATH.
+  if (useHostPathForValidation) {
+    // Simulate installer validation accepting a launcher from the host PATH.
     fs.renameSync(path.join(dist, 'installer.js'), path.join(dist, 'actual-installer.js'));
     fs.writeFileSync(
       path.join(dist, 'installer.js'),
@@ -82,12 +82,7 @@ function fixture(t, missingStage, executable = true, faultyInstaller = false) {
   const env = { ...process.env };
   const pathKey = Object.keys(env).find(key => key.toLowerCase() === 'path');
   env[pathKey] = host + path.delimiter + env[pathKey];
-  const result = spawnSync(process.execPath, [path.join(repo, 'scripts/smoke-test-package.cjs'), candidate, output], {
-    env,
-    encoding: 'utf8',
-    timeout: 30000,
-  });
-  assert.ifError(result.error);
+  const result = runSmoke(packageDirectory, output, { env });
   assert.deepEqual(
     fs.readdirSync(output).filter(name => name.startsWith('runtime-')),
     [],
@@ -97,7 +92,7 @@ function fixture(t, missingStage, executable = true, faultyInstaller = false) {
 
 for (const stage of ['install', 'cache']) {
   test(`rejects a missing ${stage} executable instead of using the host PATH`, t => {
-    const { result, output, calls } = fixture(t, stage);
+    const { result, output, calls } = runPackageSmoke(t, { missingStage: stage });
     assert.notEqual(result.status, 0);
     assert.doesNotMatch(calls, /host/);
     assert.match(fs.readFileSync(path.join(output, stage + '.log'), 'utf8'), /task\.complete result=Failed/);
@@ -106,14 +101,14 @@ for (const stage of ['install', 'cache']) {
   });
 }
 
-test('rejects a non-executable launcher instead of using the host PATH', { skip: windows }, t => {
-  const { result, calls } = fixture(t, null, false);
+test('rejects a non-executable launcher instead of using the host PATH', { skip: isWindows }, t => {
+  const { result, calls } = runPackageSmoke(t, { executable: false });
   assert.notEqual(result.status, 0);
   assert.doesNotMatch(calls, /host/);
 });
 
 test('detects PATH substitution even when installer validation regresses', t => {
-  const { result, output, calls } = fixture(t, 'install', true, true);
+  const { result, output, calls } = runPackageSmoke(t, { missingStage: 'install', useHostPathForValidation: true });
   assert.notEqual(result.status, 0);
   assert.match(calls, /host/);
   assert.ok(fs.existsSync(path.join(output, 'install-path.log')));
@@ -121,7 +116,7 @@ test('detects PATH substitution even when installer validation regresses', t => 
 });
 
 test('uses the installed executable for cold install, cache and Invoker', t => {
-  const { result, output, calls } = fixture(t, null);
+  const { result, output, calls } = runPackageSmoke(t);
   assert.equal(result.status, 0, result.stderr);
   assert.doesNotMatch(calls, /host/);
   const summary = JSON.parse(fs.readFileSync(path.join(output, 'summary.json')));
