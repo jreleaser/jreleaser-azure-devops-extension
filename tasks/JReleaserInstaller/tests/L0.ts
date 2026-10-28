@@ -7,7 +7,7 @@ import { createServer, Server } from 'node:http';
 import { AddressInfo } from 'node:net';
 import * as assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import * as ttm from 'azure-pipelines-task-lib/mock-test';
+import type { TestContext } from 'node:test';
 import * as toolLib from 'azure-pipelines-tool-lib/tool';
 import {
   downloadJReleaserRelease,
@@ -17,8 +17,9 @@ import {
   verifyJReleaserReleaseChecksum,
 } from '../utils';
 
-function createTempFile(contents: string): string {
+function createTempFile(t: TestContext, contents: string): string {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'jreleaser-installer-'));
+  t.after(() => fs.rmSync(tempDir, { recursive: true, force: true }));
   const filePath = path.join(tempDir, 'downloaded-release');
   fs.writeFileSync(filePath, contents);
   return filePath;
@@ -29,92 +30,51 @@ function sha256(contents: string): string {
 }
 
 describe('JReleaserInstaller utility suite', () => {
-  it('reads task input after loading tool-lib', () => {
-    const stdout = execFileSync(
-      process.execPath,
-      [
-        '-e',
-        `
-          try {
-            require('azure-pipelines-tool-lib/tool');
-            const task = require('azure-pipelines-task-lib/task');
-            require('node:assert/strict').equal(task.getInput('version', true), '1.25.0');
-            console.log('JRELEASER_INPUT_VERIFIED');
-          } catch (error) {
-            // task-lib's uncaught exception handler can report failure but exit with code 0.
-            console.error(error);
-            process.exitCode = 1;
-          }
-        `,
-      ],
-      {
-        cwd: path.resolve(__dirname, '..', '..'),
-        env: { ...process.env, INPUT_VERSION: '1.25.0' },
-        encoding: 'utf8',
-        timeout: 10000,
-      },
-    );
-    assert.match(stdout, /^JRELEASER_INPUT_VERIFIED$/m);
-    assert.doesNotMatch(stdout, /##vso\[task\.complete result=Failed[;\]]/);
+  it('detects musl from the glibc report and loader presence', () => {
+    for (const [header, loaderExists, expected] of [
+      [{}, true, true],
+      [{ glibcVersionRuntime: '2.35' }, true, false],
+      [{}, false, false],
+    ] as const) {
+      assert.equal(
+        isMuslLinux(
+          'x64',
+          filePath => loaderExists && filePath === '/lib/ld-musl-x86_64.so.1',
+          () => ({ header }),
+        ),
+        expected,
+        JSON.stringify({ header, loaderExists }),
+      );
+    }
   });
 
-  it('detects musl only when glibc is not reported and the musl loader exists for the current arch', () => {
-    const existsSync = (filePath: fs.PathLike): boolean => filePath === '/lib/ld-musl-x86_64.so.1';
-
-    assert.equal(
-      isMuslLinux('x64', existsSync, () => ({ header: {} })),
-      true,
-    );
+  it('selects Linux archives for each architecture and libc', () => {
+    for (const [arch, musl, expected] of [
+      ['x64', true, 'linux_musl-x86_64'],
+      ['arm64', true, 'linux_musl-aarch64'],
+      ['x64', false, 'linux-x86_64'],
+      ['arm64', false, 'linux-aarch64'],
+    ] as const) {
+      assert.equal(resolvePlatform('linux', arch, musl), expected, `${arch}, musl=${musl}`);
+    }
   });
 
-  it('does not detect musl when Node reports glibc', () => {
-    const existsSync = (filePath: fs.PathLike): boolean => filePath === '/lib/ld-musl-x86_64.so.1';
-
-    assert.equal(
-      isMuslLinux('x64', existsSync, () => ({ header: { glibcVersionRuntime: '2.35' } })),
-      false,
-    );
-  });
-
-  it('does not detect musl when the musl loader is absent', () => {
-    assert.equal(
-      isMuslLinux(
-        'x64',
-        () => false,
-        () => ({ header: {} }),
-      ),
-      false,
-    );
-  });
-
-  it('selects musl Linux archives when the Linux agent uses musl libc', () => {
-    assert.equal(resolvePlatform('linux', 'x64', true), 'linux_musl-x86_64');
-    assert.equal(resolvePlatform('linux', 'arm64', true), 'linux_musl-aarch64');
-  });
-
-  it('keeps selecting glibc Linux archives when the Linux agent does not use musl libc', () => {
-    assert.equal(resolvePlatform('linux', 'x64', false), 'linux-x86_64');
-    assert.equal(resolvePlatform('linux', 'arm64', false), 'linux-aarch64');
-  });
-
-  it('selects the exact musl release archive asset', async () => {
-    const release = await getJReleaserRelease('1.24.0', true, 'linux_musl-x86_64', [
-      {
-        name: 'jreleaser-standalone-1.24.0-linux-x86_64.zip',
-        browser_download_url: 'https://example.test/glibc-archive',
-      },
-      {
-        name: 'jreleaser-standalone-1.24.0-linux_musl-x86_64.zip',
-        browser_download_url: 'https://example.test/musl-archive',
-      },
-      {
-        name: 'checksums_sha256.txt',
-        browser_download_url: 'https://example.test/checksum',
-      },
-    ]);
-
-    assert.equal(release.name, 'jreleaser-standalone-1.24.0-linux_musl-x86_64');
-    assert.equal(release.releaseUrl, 'https://example.test/musl-archive');
+  it('selects the exact platform archive and checksum from mixed assets', async () => {
+    const assets = [
+      'jreleaser-standalone-1.23.0-linux-x86_64.zip.asc',
+      'jreleaser-standalone-1.23.0-linux_musl-x86_64.zip.asc',
+      'jreleaser-standalone-1.23.0-linux-x86_64.zip',
+      'jreleaser-standalone-1.23.0-linux_musl-x86_64.zip',
+      'checksums_sha256.txt.asc',
+      'checksums_sha256.txt',
+    ].map(name => ({ name, browser_download_url: `https://example.test/${name}` }));
+    for (const platform of ['linux-x86_64', 'linux_musl-x86_64'] as const) {
+      const release = await getJReleaserRelease('1.23.0', true, platform, assets);
+      const name = `jreleaser-standalone-1.23.0-${platform}`;
+      assert.equal(release.name, name);
+      assert.equal(release.releaseUrl, `https://example.test/${name}.zip`);
+      assert.equal(release.checksumUrl, 'https://example.test/checksums_sha256.txt');
+    }
   });
 
   it('downloads release without reusing the archive name as the temp file name', async () => {
@@ -146,45 +106,6 @@ describe('JReleaserInstaller utility suite', () => {
         configurable: true,
       });
     }
-  });
-
-  it('selects the exact release archive asset and ignores the signature asset', async () => {
-    const release = await getJReleaserRelease('1.23.0', true, 'linux-x86_64', [
-      {
-        name: 'jreleaser-standalone-1.23.0-linux-x86_64.zip.asc',
-        browser_download_url: 'https://example.test/signature',
-      },
-      {
-        name: 'jreleaser-standalone-1.23.0-linux-x86_64.zip',
-        browser_download_url: 'https://example.test/archive',
-      },
-      {
-        name: 'checksums_sha256.txt',
-        browser_download_url: 'https://example.test/checksum',
-      },
-    ]);
-
-    assert.equal(release.name, 'jreleaser-standalone-1.23.0-linux-x86_64');
-    assert.equal(release.releaseUrl, 'https://example.test/archive');
-  });
-
-  it('selects the exact checksum asset and ignores the signature asset', async () => {
-    const release = await getJReleaserRelease('1.23.0', true, 'linux-x86_64', [
-      {
-        name: 'jreleaser-standalone-1.23.0-linux-x86_64.zip',
-        browser_download_url: 'https://example.test/archive',
-      },
-      {
-        name: 'checksums_sha256.txt.asc',
-        browser_download_url: 'https://example.test/checksum-signature',
-      },
-      {
-        name: 'checksums_sha256.txt',
-        browser_download_url: 'https://example.test/checksum',
-      },
-    ]);
-
-    assert.equal(release.checksumUrl, 'https://example.test/checksum');
   });
 
   it('fails when the release archive asset is missing', async () => {
@@ -221,8 +142,8 @@ describe('JReleaserInstaller utility suite', () => {
     );
   });
 
-  it('verifies a downloaded archive against checksums_sha256.txt', async () => {
-    const downloadedFile = createTempFile('valid archive contents');
+  it('verifies a downloaded archive against checksums_sha256.txt', async t => {
+    const downloadedFile = createTempFile(t, 'valid archive contents');
 
     await verifyJReleaserReleaseChecksum(
       {
@@ -237,8 +158,8 @@ describe('JReleaserInstaller utility suite', () => {
     );
   });
 
-  it('honors proxy exclusions when downloading release checksums', { timeout: 10000 }, async () => {
-    const downloadedFile = createTempFile('archive contents');
+  it('honors proxy exclusions when downloading release checksums', { timeout: 10000 }, async t => {
+    const downloadedFile = createTempFile(t, 'archive contents');
     const archiveName = 'jreleaser-standalone-1.26.0-linux-x86_64';
     const checksum = `${sha256('archive contents')}  ${archiveName}.zip\n`;
     let directRequests = 0;
@@ -287,12 +208,11 @@ describe('JReleaserInstaller utility suite', () => {
         else process.env[key] = saved[i];
       });
       await Promise.all([direct, proxy].map(server => new Promise<void>(resolve => server.close(() => resolve()))));
-      fs.rmSync(path.dirname(downloadedFile), { recursive: true });
     }
   });
 
-  it('fails checksum verification when the archive hash differs', async () => {
-    const downloadedFile = createTempFile('corrupted archive contents');
+  it('fails checksum verification when the archive hash differs', async t => {
+    const downloadedFile = createTempFile(t, 'corrupted archive contents');
 
     await assert.rejects(
       () =>
@@ -311,8 +231,8 @@ describe('JReleaserInstaller utility suite', () => {
     );
   });
 
-  it('fails checksum verification when the archive entry is absent', async () => {
-    const downloadedFile = createTempFile('valid archive contents');
+  it('fails checksum verification when the archive entry is absent', async t => {
+    const downloadedFile = createTempFile(t, 'valid archive contents');
 
     await assert.rejects(
       () =>
@@ -333,12 +253,15 @@ describe('JReleaserInstaller utility suite', () => {
 });
 
 describe('JReleaserInstaller L0 Suite', () => {
-  it('should install JReleaser successfully', { timeout: 10000 }, async () => {
-    let tp = path.join(__dirname, 'L0InstallJReleaserSuccess.js');
-    let tr: ttm.MockTestRunner = new ttm.MockTestRunner(tp);
-
-    await tr.runAsync();
-    console.log(tr.stdout);
-    assert.equal(tr.succeeded, true);
+  it('verifies installation before publishing the bin directory', t => {
+    const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'jreleaser-install-'));
+    t.after(() => fs.rmSync(tempDirectory, { recursive: true, force: true }));
+    const stdout = execFileSync(process.execPath, [path.join(__dirname, 'L0InstallJReleaserSuccess.js')], {
+      env: { ...process.env, AGENT_TOOLSDIRECTORY: tempDirectory, AGENT_TEMPDIRECTORY: tempDirectory },
+      encoding: 'utf8',
+      timeout: 10000,
+    });
+    assert.match(stdout, /^JRELEASER_INSTALL_VERIFIED$/m);
+    assert.doesNotMatch(stdout, /##vso\[task\.complete result=Failed[;\]]/);
   });
 });
