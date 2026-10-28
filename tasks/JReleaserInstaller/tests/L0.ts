@@ -1,7 +1,7 @@
-import * as path from 'path';
-import * as os from 'os';
-import * as fs from 'fs';
-import * as crypto from 'crypto';
+import * as path from 'node:path';
+import * as os from 'node:os';
+import * as fs from 'node:fs';
+import * as crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { createServer, Server } from 'node:http';
 import { AddressInfo } from 'node:net';
@@ -253,17 +253,21 @@ describe('JReleaserInstaller utility suite', () => {
     });
     const keys = ['HTTP_PROXY', 'http_proxy', 'NO_PROXY', 'no_proxy'];
     const saved = keys.map(key => process.env[key]);
-    const listen = (server: Server): Promise<number> => new Promise((resolve, reject) => {
-      server.once('error', reject);
-      server.listen(0, '127.0.0.1', () => resolve((server.address() as AddressInfo).port));
-    });
+    const listen = (server: Server): Promise<number> =>
+      new Promise((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(0, '127.0.0.1', () => resolve((server.address() as AddressInfo).port));
+      });
     try {
       const port = await listen(direct);
       const proxyPort = await listen(proxy);
       process.env.HTTP_PROXY = process.env.http_proxy = `http://127.0.0.1:${proxyPort}`;
       const release = {
-        version: '1.26.0', platform: 'linux-x86_64' as const, name: archiveName,
-        releaseUrl: 'https://example.test/archive', checksumUrl: `http://127.0.0.1:${port}/checksums_sha256.txt`,
+        version: '1.26.0',
+        platform: 'linux-x86_64' as const,
+        name: archiveName,
+        releaseUrl: 'https://example.test/archive',
+        checksumUrl: `http://127.0.0.1:${port}/checksums_sha256.txt`,
       };
       // CIDR and /32 exclusions must keep checksum traffic off the proxy.
       // Exact-host exclusions and a nonmatching range cover normal proxy behavior.

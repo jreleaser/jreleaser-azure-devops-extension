@@ -1,7 +1,7 @@
-import * as path from 'path';
+import * as path from 'node:path';
 import * as ma from 'azure-pipelines-task-lib/mock-answer';
 import * as tmrm from 'azure-pipelines-task-lib/mock-run';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import * as assert from 'node:assert/strict';
 
 let taskPath = path.join(__dirname, '..', 'installer.js');

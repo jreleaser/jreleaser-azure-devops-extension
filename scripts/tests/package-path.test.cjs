@@ -15,9 +15,12 @@ function fixture(t, missingStage, executable = true, faultyInstaller = false) {
   const candidate = path.join(root, 'package');
   const calls = path.join(root, 'calls.txt');
   fs.writeFileSync(calls, '');
-  const program = label => windows
-    ? `@echo off\r\necho ${label}>>"${calls}"\r\nif "%~1"=="--invalid-smoke-test-option" exit /b 2\r\necho jreleaser 1.26.0\r\n`
-    : `#!${process.execPath}\nrequire('node:fs').appendFileSync(${JSON.stringify(calls)}, ${JSON.stringify(label + '\n')});
+  const program = label =>
+    windows
+      ? `@echo off\r\necho ${label}>>"${calls}"\r\nif "%~1"=="--invalid-smoke-test-option" exit /b 2\r\necho jreleaser 1.26.0\r\n`
+      : `#!${process.execPath}\nrequire('node:fs').appendFileSync(${JSON.stringify(calls)}, ${JSON.stringify(
+          label + '\n',
+        )});
        if (process.argv.includes('--invalid-smoke-test-option')) process.exit(2);
        console.log('jreleaser 1.26.0');\n`;
   const host = path.join(root, 'host-bin');
@@ -36,7 +39,9 @@ function fixture(t, missingStage, executable = true, faultyInstaller = false) {
   const dist = path.join(candidate, 'tasks/JReleaserInstaller/dist');
   // Only transport/extraction are fixtures. Installer, cache, SDK resolution,
   // and Invoker are the actual built code, with an executable on the host PATH.
-  fs.writeFileSync(path.join(dist, 'utils.js'), `
+  fs.writeFileSync(
+    path.join(dist, 'utils.js'),
+    `
     const fs = require('node:fs'), path = require('node:path');
     exports.getJReleaserRelease = async version => ({ version, platform: 'fixture', name: 'fixture-release' });
     exports.downloadJReleaserRelease = async () => {
@@ -58,26 +63,35 @@ function fixture(t, missingStage, executable = true, faultyInstaller = false) {
       }
       return extracted;
     };
-  `);
+  `,
+  );
   if (faultyInstaller) {
     // Reintroduce the reviewed bug only in this fixture: validation uses PATH.
     fs.renameSync(path.join(dist, 'installer.js'), path.join(dist, 'actual-installer.js'));
-    fs.writeFileSync(path.join(dist, 'installer.js'), `
+    fs.writeFileSync(
+      path.join(dist, 'installer.js'),
+      `
       const task = require('azure-pipelines-task-lib/task');
       const which = task.which;
       task.which = (name, check) => which(require('node:path').basename(name) === 'jreleaser' ? 'jreleaser' : name, check);
       require('./actual-installer');
-    `);
+    `,
+    );
   }
   const output = path.join(root, 'output');
   const env = { ...process.env };
   const pathKey = Object.keys(env).find(key => key.toLowerCase() === 'path');
   env[pathKey] = host + path.delimiter + env[pathKey];
-  const result = spawnSync(process.execPath, [
-    path.join(repo, 'scripts/smoke-test-package.cjs'), candidate, output,
-  ], { env, encoding: 'utf8', timeout: 30000 });
+  const result = spawnSync(process.execPath, [path.join(repo, 'scripts/smoke-test-package.cjs'), candidate, output], {
+    env,
+    encoding: 'utf8',
+    timeout: 30000,
+  });
   assert.ifError(result.error);
-  assert.deepEqual(fs.readdirSync(output).filter(name => name.startsWith('runtime-')), []);
+  assert.deepEqual(
+    fs.readdirSync(output).filter(name => name.startsWith('runtime-')),
+    [],
+  );
   return { result, output, calls: fs.readFileSync(calls, 'utf8') };
 }
 
@@ -111,7 +125,8 @@ test('uses the installed executable for cold install, cache and Invoker', t => {
   assert.equal(result.status, 0, result.stderr);
   assert.doesNotMatch(calls, /host/);
   const summary = JSON.parse(fs.readFileSync(path.join(output, 'summary.json')));
-  assert.deepEqual(summary.checks.map(check => check.name), [
-    'input', 'install', 'install-path', 'cache', 'cache-path', 'version', 'config', 'invalid-option',
-  ]);
+  assert.deepEqual(
+    summary.checks.map(check => check.name),
+    ['input', 'install', 'install-path', 'cache', 'cache-path', 'version', 'config', 'invalid-option'],
+  );
 });

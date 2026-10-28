@@ -7,7 +7,10 @@ const { spawnSync } = require('node:child_process');
 const { createRequire } = require('node:module');
 
 const [packageDirectory, outputDirectory, version = '1.26.0'] = process.argv.slice(2);
-assert.ok(packageDirectory && outputDirectory, 'Usage: node scripts/smoke-test-package.cjs <unpacked-vsix> <output-directory> [jreleaser-version]');
+assert.ok(
+  packageDirectory && outputDirectory,
+  'Usage: node scripts/smoke-test-package.cjs <unpacked-vsix> <output-directory> [jreleaser-version]',
+);
 const root = path.resolve(packageDirectory);
 const output = path.resolve(outputDirectory);
 fs.mkdirSync(output, { recursive: true });
@@ -19,18 +22,37 @@ const checks = [];
 try {
   for (const dir of ['temp', 'tools', 'home']) fs.mkdirSync(path.join(runtime, dir));
   const env = {};
-  for (const key of ['PATH', 'Path', 'OS', 'SystemRoot', 'SYSTEMROOT', 'windir', 'WINDIR', 'ComSpec', 'COMSPEC', 'PATHEXT', 'SystemDrive']) {
+  for (const key of [
+    'PATH',
+    'Path',
+    'OS',
+    'SystemRoot',
+    'SYSTEMROOT',
+    'windir',
+    'WINDIR',
+    'ComSpec',
+    'COMSPEC',
+    'PATHEXT',
+    'SystemDrive',
+  ]) {
     if (process.env[key]) env[key] = process.env[key];
   }
   Object.assign(env, {
-    HOME: path.join(runtime, 'home'), USERPROFILE: path.join(runtime, 'home'),
-    TEMP: path.join(runtime, 'temp'), TMP: path.join(runtime, 'temp'),
+    HOME: path.join(runtime, 'home'),
+    USERPROFILE: path.join(runtime, 'home'),
+    TEMP: path.join(runtime, 'temp'),
+    TMP: path.join(runtime, 'temp'),
     AGENT_TEMPDIRECTORY: path.join(runtime, 'temp'),
-    AGENT_TOOLSDIRECTORY: path.join(runtime, 'tools'), AGENT_WORKFOLDER: runtime,
+    AGENT_TOOLSDIRECTORY: path.join(runtime, 'tools'),
+    AGENT_WORKFOLDER: runtime,
   });
   function run(name, args, inputs = {}, failure = false, cwd = runtime) {
     const result = spawnSync(process.execPath, args, {
-      cwd, env: { ...env, ...inputs }, encoding: 'utf8', timeout: 180000, maxBuffer: 16 * 1024 * 1024,
+      cwd,
+      env: { ...env, ...inputs },
+      encoding: 'utf8',
+      timeout: 180000,
+      maxBuffer: 16 * 1024 * 1024,
     });
     const text = (result.stdout || '') + (result.stderr || '');
     fs.writeFileSync(path.join(output, name + '.log'), text);
@@ -56,8 +78,10 @@ try {
     const paths = [...text.matchAll(/^##vso\[task.prependpath\]([^\r\n]+)/gm)];
     assert.equal(paths.length, 1, 'Installer must publish exactly one bin directory');
     const bin = paths[0][1];
-    assert.ok(fs.realpathSync(bin).startsWith(fs.realpathSync(runtime) + path.sep),
-      'Installed bin directory must belong to this test run');
+    assert.ok(
+      fs.realpathSync(bin).startsWith(fs.realpathSync(runtime) + path.sep),
+      'Installed bin directory must belong to this test run',
+    );
     const inputs = { [pathKey]: bin + path.delimiter + env[pathKey], INPUT_LOGLEVEL: 'info' };
     const verifyPath = `try {
       const assert = require('node:assert/strict');
@@ -70,8 +94,10 @@ try {
       assert.equal(fs.realpathSync(task.which('jreleaser', true)), expected);
       console.log('JRELEASER_EXECUTABLE_VERIFIED');
     } catch (error) { console.error(error); process.exitCode = 1; }`;
-    assert.match(run(stage + '-path', ['-e', verifyPath, bin], inputs, false, invoker),
-      /^JRELEASER_EXECUTABLE_VERIFIED$/m);
+    assert.match(
+      run(stage + '-path', ['-e', verifyPath, bin], inputs, false, invoker),
+      /^JRELEASER_EXECUTABLE_VERIFIED$/m,
+    );
     return inputs;
   }
   const probe = `try {
@@ -95,10 +121,26 @@ try {
   assert.match(invoked, /##vso\[task\.complete result=Succeeded/);
   const help = run('config', [runner], { ...inputs, INPUT_COMMAND: 'config', INPUT_ARGUMENTS: '--help' });
   assert.match(help, /##vso\[task\.complete result=Succeeded/);
-  run('invalid-option', [runner], { ...inputs, INPUT_COMMAND: 'custom', INPUT_ARGUMENTS: '--invalid-smoke-test-option' }, true);
+  run(
+    'invalid-option',
+    [runner],
+    { ...inputs, INPUT_COMMAND: 'custom', INPUT_ARGUMENTS: '--invalid-smoke-test-option' },
+    true,
+  );
 } finally {
   fs.rmSync(runtime, { recursive: true, force: true });
 }
-fs.writeFileSync(summaryPath, JSON.stringify({
-  platform: process.platform, arch: process.arch, node: process.version, jreleaser: version, checks,
-}, null, 2) + '\n');
+fs.writeFileSync(
+  summaryPath,
+  JSON.stringify(
+    {
+      platform: process.platform,
+      arch: process.arch,
+      node: process.version,
+      jreleaser: version,
+      checks,
+    },
+    null,
+    2,
+  ) + '\n',
+);

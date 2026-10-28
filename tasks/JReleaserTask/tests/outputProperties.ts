@@ -136,9 +136,7 @@ describe('JReleaser output properties', () => {
 
     exportOutputProperties(ctx, logger);
 
-    assert.deepEqual(variables, [
-      { name: 'JRELEASER_PROJECT_VERSION', value: '1.2.3', secret: false, isOutput: true },
-    ]);
+    assert.deepEqual(variables, [{ name: 'JRELEASER_PROJECT_VERSION', value: '1.2.3', secret: false, isOutput: true }]);
   });
 
   it('skips duplicate output variable names after normalization', () => {
