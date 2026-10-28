@@ -452,4 +452,21 @@ describe('JReleaserTask L0 Suite', () => {
     assert.equal(distributionInput.visibleRule.includes('templateGenerate'), false);
     assert.equal(packagerInput.visibleRule.includes('templateGenerate'), false);
   });
+  it('adds only the selected log-level argument', () => {
+    for (const [logLevel, expected] of [
+      ['', []],
+      ['debug', ['--debug']],
+      ['info', ['--info']],
+      ['warn', ['--warn']],
+      ['quiet', ['--quiet']],
+    ] as const) {
+      const command = new JReleaserTemplateGenerate({} as ToolRunner);
+      command.initialize(createContext('', {
+        command: 'templateGenerate', templateGenerateType: 'announcer',
+        templateGenerateAnnouncer: 'slack', logLevel,
+      }));
+      assert.deepEqual(command.options, ['template', 'generate', '--announcer', 'slack', ...expected]);
+    }
+  });
+
 });
