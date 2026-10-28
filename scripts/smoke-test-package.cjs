@@ -19,7 +19,7 @@ const checks = [];
 try {
   for (const dir of ['temp', 'tools', 'home']) fs.mkdirSync(path.join(runtime, dir));
   const env = {};
-  for (const key of ['PATH', 'Path', 'SystemRoot', 'SYSTEMROOT', 'windir', 'WINDIR', 'ComSpec', 'COMSPEC', 'PATHEXT', 'SystemDrive']) {
+  for (const key of ['PATH', 'Path', 'OS', 'SystemRoot', 'SYSTEMROOT', 'windir', 'WINDIR', 'ComSpec', 'COMSPEC', 'PATHEXT', 'SystemDrive']) {
     if (process.env[key]) env[key] = process.env[key];
   }
   Object.assign(env, {
